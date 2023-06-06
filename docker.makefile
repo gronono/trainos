@@ -35,4 +35,4 @@ ${BUILD_DIR}/.fat32:
 
 ${BUILD_DIR}/.stage1:
 	dd if=${BUILD_DIR}/bootloader/stage1.bin of=${BUILD_DIR}/disk.bin bs=1 seek=90 conv=notrunc
-	#touch ${BUILD_DIR}/.stage1
+	touch ${BUILD_DIR}/.stage1
