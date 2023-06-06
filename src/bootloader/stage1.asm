@@ -1,5 +1,6 @@
 ; Memory address where BIOS puts us
-%define ORG 0x7C00
+; 0x7C00 + FAT32 headers = 0x7C00 + 90 bytes 
+%define ORG 0x7C5A
 ; End of Line
 %define EOL 0x0D, 0x0A
 
@@ -55,9 +56,11 @@ print:
 msg_hello: db 'Hello world!', EOL, 0
 
 ; Before writing boot sector magic number, add a bunch a nop operation
-; so the bootloader take the required 512 bytes 
+; so the bootloader take the required 512 bytes
+; but because we are using FAT32 filesystem, the reserved size must be 420 bytes
 ; $ is the current address
 ; $$ is address of start of current section
-times 512 - 2 - ( $ - $$ ) nop
+times 420 - ( $ - $$ ) nop
 ; boot sector magic number
-dw 0xAA55
+; With a FAT32, the number is already present
+; dw 0xAA55

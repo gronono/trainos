@@ -10,7 +10,7 @@ build: .prebuild ${BOOTLOADER_BUILD_DIR}/stage1.bin
 clean:
 	rm -rf ${BUILD_DIR}
 
-${BOOTLOADER_BUILD_DIR}/stage1.bin:
+${BOOTLOADER_BUILD_DIR}/stage1.bin: ${BOOTLOADER_SOURCE_DIR}/stage1.asm
 	nasm -f bin ${BOOTLOADER_SOURCE_DIR}/stage1.asm -o ${BOOTLOADER_BUILD_DIR}/stage1.bin
 
 .PHONY: .prebuild
