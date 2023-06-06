@@ -34,5 +34,8 @@ ${BUILD_DIR}/.fat32:
 	touch ${BUILD_DIR}/.fat32
 
 ${BUILD_DIR}/.stage1:
+	# copy stage1 in boot code
 	dd if=${BUILD_DIR}/bootloader/stage1.bin of=${BUILD_DIR}/disk.bin bs=1 seek=90 conv=notrunc
+	# and this backup
+	dd if=${BUILD_DIR}/bootloader/stage1.bin of=${BUILD_DIR}/disk.bin bs=1 seek=3162 conv=notrunc
 	touch ${BUILD_DIR}/.stage1
