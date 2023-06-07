@@ -1,12 +1,14 @@
 FROM debian:bullseye
 
-
 RUN apt-get update
 RUN apt-get upgrade -y
+RUN apt-get install -y curl
 RUN apt-get install -y dosfstools
 RUN apt-get install -y file
 RUN apt-get install -y nasm
 RUN apt-get install -y make
+RUN apt-get install -y mtools
+RUN apt-get install -y qemu-system-x86
 
 RUN mkdir -p /trainos
 WORKDIR /trainos
@@ -15,7 +17,8 @@ VOLUME [ "/trainos" ]
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-RUN groupadd -r -g $GROUP_ID trainos
-RUN useradd  -u $USER_ID trainos -g trainos
+RUN groupadd --gid $GROUP_ID trainos
+RUN useradd  --uid $USER_ID trainos --gid trainos --create-home
 USER trainos
+
 

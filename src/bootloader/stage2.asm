@@ -1,5 +1,4 @@
-; Memory address where BIOS puts us
-; %define ORG 0x7C00
+; Memory address where our are loaded from stage1 
 %define ORG 0x7C5A
 ; End of Line
 %define EOL 0x0D, 0x0A
@@ -8,17 +7,6 @@
 bits 16
 ; BIOS puts the bootloader at 7C00 memory address
 org ORG
-
-; Memory will be address without offset
-; So reset segment registers
-xor ax, ax  ; ax = 0
-mov ds, ax
-mov es, ax
-mov ss, ax 
-
-; Setup stack
-; stack grows downwards from where we are loaded in memory
-mov sp, ORG
 
 ; Print Hello World
 mov si, msg_hello
@@ -53,14 +41,4 @@ print:
         ret
 
 ; Variables
-msg_hello: db 'Hello from stage1!', EOL, 0
-
-; Before writing boot sector magic number, add a bunch a nop operation
-; so the bootloader take the required 512 bytes
-; but because we are using FAT32 filesystem, the reserved size must be 420 bytes
-; $ is the current address
-; $$ is address of start of current section
-times 420 - ( $ - $$ ) nop
-; boot sector magic number
-; With a FAT32, the number is already present
-; dw 0xAA55
+msg_hello: db 'Hello from stage2!', EOL, 0

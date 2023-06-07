@@ -3,7 +3,7 @@ include ./Makefile.inc
 MODULES := "bootloader"
 
 .PHONY: build
-build: .prebuild .build_modules .disk
+build: .prebuild .build_modules ${BUILD_DIR}/${OS_NAME}.bin
 
 .PHONY: clean
 clean:
@@ -15,7 +15,7 @@ clean:
 
 .PHONY: .prebuild
 .prebuild:
-	mkdir -p ${BUILD_DIR}
+	@mkdir -p ${BUILD_DIR}
 
 .PHONY: .build_modules
 .build_modules:
@@ -23,19 +23,26 @@ clean:
 		make --directory ${SOURCE_DIR}/$$module build ; \
 	done
 
-.PHONY: .disk
-.disk: ${BUILD_DIR}/disk.bin ${BUILD_DIR}/.fat32 ${BUILD_DIR}/.stage1
-
-${BUILD_DIR}/disk.bin:
-	dd if=/dev/zero of=${BUILD_DIR}/disk.bin bs=1M count=${DISK_SIZE}
-
-${BUILD_DIR}/.fat32:
-	mkfs.fat -F 32 -n $(shell echo ${OS_NAME} | tr a-z A-Z) ${BUILD_DIR}/disk.bin
-	touch ${BUILD_DIR}/.fat32
-
-${BUILD_DIR}/.stage1:
+${BUILD_DIR}/${OS_NAME}.bin:
+	# Create empty disk
+	dd if=/dev/zero of=$@ bs=1M count=${DISK_SIZE}
+	# Format disk into ${DISK_FORMAT}
+ifeq ($(DISK_FORMAT),FAT12)
+	mkfs.fat -F 12 -n $(shell echo ${OS_NAME} | tr a-z A-Z) $@
 	# copy stage1 in boot code
-	dd if=${BUILD_DIR}/bootloader/stage1.bin of=${BUILD_DIR}/disk.bin bs=1 seek=90 conv=notrunc
+	dd if=${BUILD_DIR}/bootloader/stage1.bin of=$@ bs=1 seek=62 conv=notrunc
+else ifeq ($(DISK_FORMAT),FAT16)
+	mkfs.fat -F 16 -n $(shell echo ${OS_NAME} | tr a-z A-Z) $@
+	# copy stage1 in boot code
+	dd if=${BUILD_DIR}/bootloader/stage1.bin of=$@ bs=1 seek=62 conv=notrunc
+else ifeq ($(DISK_FORMAT),FAT32)
+	mkfs.fat -F 32 -n $(shell echo ${OS_NAME} | tr a-z A-Z) $@
+	# copy stage1 in boot code
+	dd if=${BUILD_DIR}/bootloader/stage1.bin of=$@ bs=1 seek=90 conv=notrunc
 	# and this backup
-	dd if=${BUILD_DIR}/bootloader/stage1.bin of=${BUILD_DIR}/disk.bin bs=1 seek=3162 conv=notrunc
-	touch ${BUILD_DIR}/.stage1
+	dd if=${BUILD_DIR}/bootloader/stage1.bin of=$@ bs=1 seek=3162 conv=notrunc
+else 
+	$(error unsupported disk format: ${DISK_FORMAT} )
+endif
+	# Copy stage2 into disk
+	mcopy -i $@ $(BUILD_DIR)/bootloader/stage2.bin "::stage2.bin"
