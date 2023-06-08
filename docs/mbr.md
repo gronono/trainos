@@ -19,42 +19,42 @@ Because there are many of optional values, the following table is only displays 
 
 | Offset  | Size | Description                         |
 |---------|------|-------------------------------------|
-|  0x0000 |  218 | Bootstrap code area (part 1)[^1]    |
+|  0x0000 |  218 | Bootstrap code area (part 1)        |
 |  0x00DA |    6 | unsed by either `parted` or `fdisk` |
-|  0x00E0 |  216 | Bootstrap code area (part 2)[^1]    |
+|  0x00E0 |  216 | Bootstrap code area (part 2)        |
 |  0x01B8 |    4 | Disk signature                      |
 |  0x01BC |    2 | unsed by either `parted` or `fdisk` |
 |  0x01BE |   16 | Primary partition entry #1          |
 |  0x01CE |   16 | Primary partition entry #2          |
 |  0x01DE |   16 | Primary partition entry #3          |
 |  0x01EE |   16 | Primary partition entry #4          |
-|  0x01FE |    2 | Boot signature[^2]                  |
+|  0x01FE |    2 | Boot signature                      |
 | Size    |  512 |                                     |
 
-[^1]: The bootloader is divided into two parts.
+The bootloader is divided into two parts.
 The first part is located at address `0x00` with a size of 218 bytes, and the second part is at address `0x00E0` with a size of 216 bytes.
 Thus, during execution, the code is located respectively at addresses `0x7C00` and `0x7CE0` (`0x7C00` + `0x00E0`).
 
-[^2]: The boot signature is always `0xAA55`. It is used by the BIOS to identify that the sector contains a bootloader.
+The boot signature is always `0xAA55`. It is used by the BIOS to identify that the sector contains a bootloader.
 
 Each primary partition entry has the following format: (the offset is relative to the start of the corresponding partition entry).
 
 
 | Offset  | Size | Description                          |
 |---------|------|--------------------------------------|
-|    0x00 |    1 | Partition flags[^4]                  |
-|    0x01 |    3 | CHS Address of partition start[^3]   |
-|    0x04 |    1 | Partition type[^5]                   |
+|    0x00 |    1 | Partition flags                      |
+|    0x01 |    3 | CHS Address of partition start       |
+|    0x04 |    1 | Partition type                       |
 |    0x05 |    3 | CHS address of last partition sector |
 |    0x08 |    4 | LBA of partition start               |
 |    0x0C |    4 | Number of sectors in partition       |
 | Size    |   16 |                                      |
 
-[^3]: In modern storage devices, the concept of cylinders and heads is no longer relevant, and CHS (Cylinder-Head-Sector) addressing is not accurate or reliable. Instead, LBA (Logical Block Addressing) is the standard method used to address sectors on disks. The LBA of the partition end can be calculated by adding the number of sectors in the partition to the LBA of the partition start.
+In modern storage devices, the concept of cylinders and heads is no longer relevant, and CHS (Cylinder-Head-Sector) addressing is not accurate or reliable. Instead, LBA (Logical Block Addressing) is the standard method used to address sectors on disks. The LBA of the partition end can be calculated by adding the number of sectors in the partition to the LBA of the partition start.
 
-[^4]: Only the first bit is used in the flags. If it is set, it indicates that the partition is active, meaning it is bootable.
+Only the first bit is used in the flags. If it is set, it indicates that the partition is active, meaning it is bootable.
 
-[^5]: The list of partition types can be found on the Wikipedia page [Partition type](https://en.wikipedia.org/wiki/Partition_type#List_of_partition_IDs).
+The list of partition types can be found on the Wikipedia page [Partition type](https://en.wikipedia.org/wiki/Partition_type#List_of_partition_IDs).
 
 Here are some values for well-known partition types:
 | Type  | Value |
@@ -112,7 +112,7 @@ The hexadecimal values are written in little-endian notation. They should be rea
 This translates to a more human-readable table as follows:
 | Offset | Description                         | Hex value   | Comments               |
 |--------|-------------------------------------|-------------|------------------------|
-| 0x0000 | Bootloader                          |             | default bootloader[^6] |
+| 0x0000 | Bootloader                          |             | default bootloader     |
 | 0x004B | unsed                               | 00...       |                        |
 | 0x01B8 | Disk signature                      | a3 79 1e 21 |                        |
 | 0x01BC | unsed                               |                                      |
@@ -120,26 +120,26 @@ This translates to a more human-readable table as follows:
 | 0x01BF | Partition #1 CHS start              | 10 01 00    |                        |
 | 0x01C2 | Partition #1 type                   | 0e          | FAT16B with LBA        |
 | 0x01C3 | Partition #1 CHS end                | af 20 03    |                        |
-| 0x01C7 | Partition #1 LBA start              | 00 00 08 00 | 2048th sector[^7]      |
-| 0x01CA | Partition #1 Number of sectors      | 00 00 50 00 | 20,480 sectors[^8]     |
+| 0x01C7 | Partition #1 LBA start              | 00 00 08 00 | 2048th sector          |
+| 0x01CA | Partition #1 Number of sectors      | 00 00 50 00 | 20,480 sectors         |
 | 0x01CE | Partition #2 flags                  | 00          | Boot flag unset        |
 | 0x01CF | Partition #2 CHS start              | b0 01 00    |                        |
 | 0x01D2 | Partition #2 type                   | 0c          | FAT32B with LBA        |
 | 0x01D3 | Partition #2 CHS end                | 4f 60 03    |                        |
-| 0x01D6 | Partition #2 LBA start              | 00 00 58 00 | 22,528th sector[^9]    |
+| 0x01D6 | Partition #2 LBA start              | 00 00 58 00 | 22,528th sector        |
 | 0x01DA | Partition #2 Number of sectors      | 00 00 50 00 | 20,480 sectors         |
 | 0x01DE | undefined partition #3              | 00...       |                        |
 | 0x01EE | undefined partition #4              | 00...       |                        |
 | 0x01FE | Boot signature                      | aa 55       |                        |
 | 0x0200 | empty space                         | 00...       |                        |
 
-[^6]: Until address `0x4A`, parted defines its own bootloader. See the page [Understanding the bootloader in parted](https://github.com/gronono/trainos/blob/main/docs/parted-bootloader.md).
+Until address `0x4A`, parted defines its own bootloader. See the page [Understanding the bootloader in parted](https://github.com/gronono/trainos/blob/main/docs/parted-bootloader.md).
 
-[^7]: The LBA of the first partition's start is `0x800`. This corresponds to the expected value of 2048 sectors that you passed to `parted` when creating the partition.
+The LBA of the first partition's start is `0x800`. This corresponds to the expected value of 2048 sectors that you passed to `parted` when creating the partition.
 
-[^8]: The number of sectors in the first partition is `0x5000`. Since the sector size is 512 bytes, the partition has the expected size of 10 MiB.
+The number of sectors in the first partition is `0x5000`. Since the sector size is 512 bytes, the partition has the expected size of 10 MiB.
 
-[^9]: The second partition starts just after the first one, at the 22,528th sector. This value is obtained by adding the starting sector of the first partition (2,048th) to the number of sectors in the first partition (20,480).
+The second partition starts just after the first one, at the 22,528th sector. This value is obtained by adding the starting sector of the first partition (2,048th) to the number of sectors in the first partition (20,480).
 
 ### With fdisk
 
