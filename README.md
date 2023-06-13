@@ -1,3 +1,12 @@
+Requirements:
+    docker
+    make
+
+Building:
+    make toolchain
+    make clean
+    make build
+
 TODO :
 - [x] chore: setup build
 - [ ] chore: bochs emulator

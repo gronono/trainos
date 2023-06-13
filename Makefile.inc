@@ -5,3 +5,5 @@ OS_NAME             := trainos
 BUILD_IMAGE_NAME    := ${OS_NAME}
 DISK_SIZE           := 128
 DISK_FORMAT         := FAT32
+# DISK_SIZE           := 32
+# DISK_FORMAT         := FAT12
