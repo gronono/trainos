@@ -26,17 +26,12 @@ clean:
 disk:
 	# Create empty disk
 	dd if=/dev/zero of=${DISK} bs=1M count=${DISK_SIZE}
+	parted -s ${DISK} mktable msdos
 
 	# Copy MBR
-	dd if=${BUILD_DIR}/bootloader/mbr.bin of=${DISK} bs=1 seek=0 conv=notrunc
+	dd if=${BUILD_DIR}/bootloader/mbr1.bin of=${DISK} bs=1 seek=0 conv=notrunc
+	dd if=${BUILD_DIR}/bootloader/mbr2.bin of=${DISK} bs=1 seek=224 conv=notrunc
 
 	# Format disk into ${DISK_FORMAT}
-ifeq ($(DISK_FORMAT),FAT12)
-#	mkfs.fat -F 12 -n $(shell echo ${OS_NAME} | tr a-z A-Z) ${DISK}
-else ifeq ($(DISK_FORMAT),FAT16)
-#	mkfs.fat -F 16 -n $(shell echo ${OS_NAME} | tr a-z A-Z) ${DISK}
-else ifeq ($(DISK_FORMAT),FAT32)
-#	mkfs.fat -F 32 -n $(shell echo ${OS_NAME} | tr a-z A-Z) ${DISK}
-else 
-	$(error unsupported disk format: ${DISK_FORMAT} )
-endif
+	parted -s ${DISK} mkpart primary fat32 1MiB 11MiB
+	parted -s ${DISK} set 1 boot on

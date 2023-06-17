@@ -3,12 +3,13 @@ FROM debian:bullseye
 RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install -y curl
-RUN apt-get install -y dosfstools
 RUN apt-get install -y file
 RUN apt-get install -y nasm
 RUN apt-get install -y make
 RUN apt-get install -y mtools
+RUN apt-get install -y parted
 RUN apt-get install -y qemu-system-x86
+RUN apt-get install -y udev
 
 RUN mkdir -p /trainos
 WORKDIR /trainos

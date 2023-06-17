@@ -75,7 +75,7 @@ $ parted -s disk.bin mktable msdos
 $ parted -s disk.bin mkpart primary fat16 1MiB 11MiB
 $ parted -s disk.bin set 1 boot on
 $ parted -s disk.bin mkpart primary fat32 11MiB 12MiB
-$ parted -s disk.bin unit -s print
+$ parted -s disk.bin unit s print
 Model:  (file)
 Disk disk.bin: 262144s
 Sector size (logical/physical): 512B/512B

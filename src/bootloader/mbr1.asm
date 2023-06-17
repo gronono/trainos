@@ -1,5 +1,7 @@
 ;
 ; Create the bootloader inside the Master Boot Record.
+; This is the first part of the bootloader located on disk at 0x0000-0x00DA.
+;
 ; Search for the first active partition and jump to its bootloader.
 ;
 
@@ -19,7 +21,10 @@ bits 16
 %define BOOTLOADER_ADDRESS  0x7C00
 ; Location after copy our self
 %define NEXT_LOCATION       MIN_AVAILABLE_MEM
-; MBR = 512 bytes
+; Bootload can be splitted into 2 parts
+; this is the first part of size 218 bytes
+%define OUR_SIZE            218
+; MBR size
 %define MBR_SIZE            512
 ; End of Line \r\n
 %define EOL                 0x0D, 0x0A
@@ -58,6 +63,8 @@ resume:
     mov si, NEXT_LOCATION + msg_hello
     call print_string
 
+    ; Lookup for a bootable partition
+    
     mov si, NEXT_LOCATION + no_bootable_partition
     call print_string
 
@@ -72,6 +79,4 @@ no_bootable_partition:  db 'No bootable partition!', 0
 
 end:
 ; Fill the rest of space with zeros
-times MBR_SIZE  -2 - ( end - begin ) db 0
-; Boot signature
-dw 0xAA55
+times OUR_SIZE - ( end - begin ) db 0

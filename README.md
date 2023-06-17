@@ -2,10 +2,11 @@ Requirements:
     docker
     make
 
-Building:
+Building & Running:
     make toolchain
     make clean
     make build
+    make run
 
 TODO :
 - [x] chore: setup build
