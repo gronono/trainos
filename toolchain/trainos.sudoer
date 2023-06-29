@@ -1,1 +1,1 @@
-trainos ALL = NOPASSWD:/usr/sbin/losetup
+trainos ALL = (root) NOPASSWD: /sbin/losetup
