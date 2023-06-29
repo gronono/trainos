@@ -11,6 +11,7 @@ clean:
 	@for module in ${MODULES}; do \
 		make --directory ${SOURCE_DIR}/$$module clean ; \
 	done
+	@rm -rf ${DISK}
 
 .PHONY: .prebuild
 .prebuild:
@@ -29,9 +30,11 @@ disk:
 	parted -s ${DISK} mktable msdos
 
 	# Copy MBR
-	dd if=${BUILD_DIR}/bootloader/mbr1.bin of=${DISK} bs=1 seek=0 conv=notrunc
-	dd if=${BUILD_DIR}/bootloader/mbr2.bin of=${DISK} bs=1 seek=224 conv=notrunc
+	dd if=${BUILD_DIR}/bootloader/mbr.bin of=${DISK} bs=1 seek=0 conv=notrunc
 
 	# Format disk into ${DISK_FORMAT}
 	parted -s ${DISK} mkpart primary fat32 1MiB 11MiB
 	parted -s ${DISK} set 1 boot on
+
+	# Copy Stage1
+	#dd if=${BUILD_DIR}/bootloader/stage1.bin of=${DISK} bs=512 seek=2048 conv=notrunc

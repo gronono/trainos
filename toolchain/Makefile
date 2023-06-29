@@ -10,6 +10,7 @@ build: ${BUILD_DIR}/.docker
 
 ${BUILD_DIR}/.docker: Dockerfile
 	docker build --build-arg USER_ID=${USER_ID} --build-arg GROUP_ID=${GROUP_ID} -t ${BUILD_IMAGE_NAME} .
+	@mkdir -p ${BUILD_DIR}
 	@touch ${BUILD_DIR}/.docker
 
 .PHONY: clean

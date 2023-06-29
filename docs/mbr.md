@@ -8,7 +8,7 @@ This format is not standardized. Its various uses actually serve as the standard
 
 When the BIOS starts, it loads the first sector of the disk into memory at address `0x7C00`, and then executes the code at that location. This first sector is called the "Master Boot Record" and has a size of 512 bytes.
 
-The code executed by the BIOS is called the bootloader. Its main task is to search for an active partition and boot the operating system cont
+The code executed by the BIOS is called the bootloader. Its main task is to search for an active partition and boot the operating system.
 
 There are multiple ways of organizing the MBR. `parted` and `fdisk` appear to use the "Structure of a modern standard MBR" defined on the [Master boot record Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record#Sector_layout).
 ained within that partition.
