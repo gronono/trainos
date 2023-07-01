@@ -37,11 +37,14 @@ LOOP_DEVICE=$(sudo losetup -Pf --show "${DISK}")
 echo "Loop device: ${LOOP_DEVICE}"
 PARTITION_DEVICE="${LOOP_DEVICE}p1"
 try sudo mkfs.fat -F 16 -n TRAINOS -f 1 "${PARTITION_DEVICE}"
-try sudo losetup -d /dev/loop10
+try mkdir -p build/disk
+try sudo mount "${PARTITION_DEVICE}" build/disk
+info "Copy stage2"
+try sudo cp build/stage2.bin build/disk
+try sudo umount build/disk
+try sudo losetup -d "${LOOP_DEVICE}"
 
 FAT16_HEADERS_SIZE=62 # Length of FAT16 headers before boot code (in bytes)
 STAGE1_LOCATION=$(( PARTITION_START * 512 + FAT16_HEADERS_SIZE ))
 info "Copy stage1 to ${STAGE1_LOCATION}"
 try dd if=build/stage1.bin of="${DISK}" bs=1 seek=${STAGE1_LOCATION} conv=notrunc
-
-#info "Copy stage2"
