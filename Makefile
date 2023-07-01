@@ -1,10 +1,9 @@
 include ./Makefile.inc
 DOCKER_GUI_ARGS := -v /tmp/.X11-unix:/tmp/.X11-unix -v ${HOME}/.Xauthority:/home/trainos/.Xauthority -e DISPLAY=${DISPLAY}
 
-
 .PHONY: build
 build: .prebuild
-	docker run --rm -v ${ROOT_DIR}:/trainos --privileged=true ${BUILD_IMAGE_NAME} make -f docker.makefile build
+	docker run --rm -v ${ROOT_DIR}:/trainos --privileged=true -v /dev:/dev ${BUILD_IMAGE_NAME} make -f docker.makefile build
 
 .PHONY: run
 run:

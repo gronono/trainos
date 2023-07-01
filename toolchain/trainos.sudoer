@@ -1,1 +1,2 @@
 trainos ALL = (root) NOPASSWD: /sbin/losetup
+trainos ALL = (root) NOPASSWD: /sbin/mkfs.fat
