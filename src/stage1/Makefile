@@ -1,0 +1,14 @@
+include ../../Makefile.inc
+
+.PHONY: build
+build: .prebuild stage1.bin
+
+.PHONY: clean
+clean:
+	rm -rf ${BUILD_DIR}/stage1.bin
+
+stage1.bin: stage1.asm
+	nasm -f bin stage1.asm -o ${BUILD_DIR}/stage1.bin 
+
+.prebuild:
+	@mkdir -p ${BUILD_DIR}

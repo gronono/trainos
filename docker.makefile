@@ -1,6 +1,5 @@
 include ./Makefile.inc
 
-MODULES := "bootloader"
 DISK := ${BUILD_DIR}/${OS_NAME}.bin
 
 .PHONY: build
@@ -8,9 +7,6 @@ build: .prebuild .build_modules disk
 
 .PHONY: clean
 clean:
-	@for module in ${MODULES}; do \
-		make --directory ${SOURCE_DIR}/$$module clean ; \
-	done
 	@rm -rf ${BUILD_DIR}
 
 .PHONY: .prebuild
@@ -19,9 +15,9 @@ clean:
 
 .PHONY: .build_modules
 .build_modules:
-	@for module in ${MODULES}; do \
-		make --directory ${SOURCE_DIR}/$$module build ; \
-	done
+	@make --directory ${SOURCE_DIR}/mbr build
+	@make --directory ${SOURCE_DIR}/stage1 build
+	@make --directory ${SOURCE_DIR}/stage2 build
 
 .PHONY: disk
 disk:

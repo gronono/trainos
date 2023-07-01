@@ -23,7 +23,7 @@ info "Create msdos table"
 try parted -s "${DISK}" mktable msdos
 
 info "Copy MBR"
-try dd if=build/bootloader/mbr.bin of="${DISK}" bs=1 seek=0 conv=notrunc
+try dd if=build/mbr.bin of="${DISK}" bs=1 seek=0 conv=notrunc
 
 PARTITION_START=2048  # Start of partition (in sectors)
 PARTITION_SIZE=$(( 10 * 1024 * 1024 / 512 )) # Size of the partition (in sectors)
@@ -42,4 +42,6 @@ try sudo losetup -d /dev/loop10
 FAT16_HEADERS_SIZE=62 # Length of FAT16 headers before boot code (in bytes)
 STAGE1_LOCATION=$(( PARTITION_START * 512 + FAT16_HEADERS_SIZE ))
 info "Copy stage1 to ${STAGE1_LOCATION}"
-try dd if=build/bootloader/stage1.bin of="${DISK}" bs=1 seek=${STAGE1_LOCATION} conv=notrunc
+try dd if=build/stage1.bin of="${DISK}" bs=1 seek=${STAGE1_LOCATION} conv=notrunc
+
+#info "Copy stage2"

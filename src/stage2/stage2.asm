@@ -1,17 +1,14 @@
 bits 16
-org 0x7C3E ; 0x7C00 + FAT16 headers (62 bytes = 0x3E)
 
+; End of Line \r\n
 %define EOL                     0x0D, 0x0A
 ; Magic breakpoint from Bochs
 %define BREAKPOINT              xchg bx, bx
-begin:
-    BREAKPOINT
-    mov ax, cs
-    mov ds, ax
 
-    mov si, msg_hello
-    call print_string
-    
+BREAKPOINT
+mov si, msg_hello
+call print_string
+
 halt:
     cli
     mov si, msg_halt
@@ -43,8 +40,6 @@ print_string:
         ret
 
 msg_halt:                   db 'Halt!', EOL, 0
-msg_hello:                  db 'Hello Stage1!', EOL, 0
+msg_hello:                  db 'Hello Stage2!', EOL, 0
 
 end:
-; Fill the rest of space with zeros
-times 448 - ( end - begin ) nop
