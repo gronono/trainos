@@ -62,14 +62,14 @@ start:
     ;
     mov cx, 4       ; counter for looping over partitions
     mov si, 0x01BE  ; First partition
-.check_partition:
+loop_partition:
     ; check if the first byte of the partition entry contains the boot flag
     mov ax, [si]                    ; ax = content of the 1st byte
     and ax, 0b10000000              ; and with boot flag mask (first bit)
     cmp ax, 0b10000000              ; compare if ax is the flag
-    je .load_vbr                    ; if it is the case, jump to load_vbr
+    je load_vbr                     ; if it is the case, jump to load_VBR
     add si, 16                      ; next partition (each partition entry is 16 bytes long)
-    loop .check_partition           ; loop; decrement CX until 0 then continue
+    loop loop_partition             ; loop; decrement CX until 0 then continue
     
     ; No partition boot flag found on all 4 partitions
     ; Display a message and halt
@@ -77,35 +77,75 @@ start:
     call print_string
     jmp halt
 
-.load_vbr:
+load_vbr:
+    ; Fill DAP
     ; Read first sector of the partition (ie VBR)
-    mov cx, 1   ; 1 sector
-    ; destination = ES:BX = 0:07C00
-    mov ax, 0
-    mov es, ax
-    mov bx, 0x7C00
+    mov word [disk_dap.number_of_sectors], 1
+    ; destination = 0:07C00
+    mov word [disk_dap.buffer_segment], 0
+    mov word [disk_dap.buffer_offset], 0x7C00
     ; LBA of the partition = offset of 0x08 from partition entry
     add si, 0x08
     mov eax, [si]
-    call disk_read
-    
-    BREAKPOINT
-    mov si, msg_yep
-    call print_string
-    jmp halt
-    
+    mov dword [disk_dap.lba], eax
+    ; Source = DS:SI = Addres of DAP
+    ; DS is already set at 0x50
+    mov si, disk_dap
+
+    ; Call read from LBA
+    mov ah, 0x42
+    int 0x13
+    jc disk_error
+
+    ; Jump to VBR
+    jmp 0:0x7C00
+
 halt:
     cli
     mov si, msg_halt
     call print_string
     hlt
 
-%include "print.asm"
-%include "disk.asm"
+disk_error:
+    mov si, msg_disk_error
+    call print_string
+    jmp halt
+
+;
+; Print a zero-terminated string by calling 0x10 BIOS interruption
+; Input:
+; - si : points to the string
+; Ouput:
+; - si : points to next address after the end of the string
+print_string:
+    push ax ; al / ah
+    push bx ; bh
+
+    .loop:
+        lodsb           ; al = next character, si++
+        cmp al, 0       ; test if al = 0 (ie end of string)
+        je .done        ; if true then jump to done
+        mov ah, 0x0E    ; 0x0E = BIOS teletype    
+        mov bh, 0       ; set page number to 0
+        int 0x10        ; call BIOS interruption
+        jmp .loop       ; continue looping
+    
+    .done:
+        pop bx
+        pop ax
+        ret
 
 msg_halt:                   db 'Halt!', EOL, 0
 msg_no_bootable_partition:  db 'No bootable partition!', EOL, 0
 msg_yep:                    db 'YEP :)', 0
+msg_disk_error              db 'Disk error!', EOL, 0
+disk_dap:
+    .packet_size            db  0x10
+    .reserved               db  0x00
+    .number_of_sectors      dw  0x0001
+    .buffer_offset          dw  0x0000
+    .buffer_segment         dw  0x0000
+    .lba                    dq  0x00000000
 
 end:
 ; Fill the rest of space with zeros

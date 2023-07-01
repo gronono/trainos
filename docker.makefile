@@ -11,7 +11,7 @@ clean:
 	@for module in ${MODULES}; do \
 		make --directory ${SOURCE_DIR}/$$module clean ; \
 	done
-	@rm -rf ${DISK}
+	@rm -rf ${BUILD_DIR}
 
 .PHONY: .prebuild
 .prebuild:
