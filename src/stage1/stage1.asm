@@ -1,70 +1,87 @@
 ;
-; Read FAT partition to load stage2
-;
-; We cannot assume that stage1 is loaded from our MBR
+; Create the bootloader inside the Master Boot Record.
+; Load and execute stage2
 ;
 
-; Size of headers before our code
-%define FAT_HEADERS_SIZE        62
+bits 16 ; This bootloader is executed on real mode so in 16 bits
+org 0   ; Tell nasm do not translate addresses
+
 ; End of Line \r\n
 %define EOL                     0x0D, 0x0A
 ; Magic breakpoint from Bochs
 %define BREAKPOINT              xchg bx, bx
 
-bits 16 ; Real mode
-org FAT_HEADERS_SIZE  ; Because of FAT headers, tell NASM to offset address
-
 begin:
+    ; Because we are not ready
     ; Disable interrupts
-    cli 
-    ; Reset direction flag
-    cld
-
-    ; Our are loaded to 0:0x7C00
-    ; we want plenty of continue space to load stage2
-    ; so move our self to lowest available memory
-    ; Source = DS:SI
+    cli
+    
+    ; Because we will copy the bootable partition at standard address 0x7C00
+    ; we need to copy our self 0x0600
+    ; movsb copy from DS:SI to ES:DI
+    ; set DS from our source
     mov ax, 0x07C0  ; 0x07C0:0 = 0x07C0 * 0x10 + 0 = 0x7C00
     mov ds, ax
-    xor si, si
-    ; Destination = ES:DI
-    mov ax, 0x0050  ; 0x0050 is the lowest available memory
+    ; set es to our destination
+    mov ax, 0x0060 
     mov es, ax
-    xor di, di
-    ; our size = 512 bytes
-    mov cx, 512
-    ; perform copy
-    rep movsb
+    ; and set si and di offsets to 0
+    mov si, 0
+    mov di, 0
+    ; counter = 512 bytes = our size
+    mov cx, 512     
+    ; repeat cx time: copy 1 byte from ds:si to es:di and increment si, di by one
+    rep movsb       
 
     ; Continue from our new location
-    jmp 0x0050:start
+    jmp 0x0060:start
 
 start:
-    ; because we move to 0x0500, DS should be 0x50
-    mov ax, 0x0050
+    ; because we move to 0x0600, DS should be 0x60
+    mov ax, 0x0060
     mov ds, ax
-    mov es, ax
 
-    ; Setup the stack
-    ; because the stack goes downward, we want the stack point at the max available address (0x7FFFF)
-    ; the highest stack pointer is 0xFFFF
-    ; so to get address 0x7FFFF, we set the stack segment to 0x7000
-    ; so highest memory address will be 0x7000 * 0x10 + 0xFFFF = 0x7FFFF
-    mov sp, 0xFFFF
-    mov ax, 0x7000
+    ; Setup the stack juste before us
+    ; 0x50:0xFF = 0x05FF
+    mov sp, 0x00FF
+    mov ax, 0x0050
     mov ss, ax
 
-    ; Ready for interrupts
+    ; Reset direction flag, so we know this value
+    cld
+    
+    ; Setup finished we enable interruption
     sti
     
-    
-    mov si, msg_hello
+    ; Load stage 2
+    ; Fill DAP
+    mov ax, [stage2_size]
+    mov word [disk_dap.number_of_sectors], ax
+    ; destination = 0:0x800 (0x600+512)
+    mov word [disk_dap.buffer_segment], 0
+    mov word [disk_dap.buffer_offset], 0x800
+    ; LBA of the partition = 2nd sector = 1
+    mov eax, 1
+    mov dword [disk_dap.lba], eax
+    ; Source = DS:SI = Addres of DAP
+    ; DS is already set at 0x60
+    mov si, disk_dap
+
+    ; Call read from LBA
+    mov ah, 0x42
+    int 0x13
+    jc disk_error
+
+    ; Jump to stage 2 at 0x0800
+    mov ax, 0x80
+    mov ds, ax
+    mov es, ax
+    jmp 0x80:0
+
+disk_error:
+    mov si, msg_disk_error
     call print_string
-    
-halt:
     cli
-    mov si, msg_halt
-    call print_string
     hlt
 
 ;
@@ -92,8 +109,19 @@ print_string:
         ret
 
 msg_halt:                   db 'Halt!', EOL, 0
-msg_hello:                  db 'Hello Stage1!', EOL, 0
+msg_no_bootable_partition:  db 'No bootable partition!', EOL, 0
+msg_yep:                    db 'YEP :)', 0
+msg_disk_error              db 'Disk error!', EOL, 0
+disk_dap:
+    .packet_size            db  0x10
+    .reserved               db  0x00
+    .number_of_sectors      dw  0x0001
+    .buffer_offset          dw  0x0000
+    .buffer_segment         dw  0x0000
+    .lba                    dq  0x00000000
 
 end:
 ; Fill the rest of space with zeros
-times 448 - ( end - begin ) nop
+times 440 - 2 - ( end - begin ) db 0
+; (reserve 2 bytes for stage2 length)
+stage2_size:                

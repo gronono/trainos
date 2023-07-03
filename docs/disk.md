@@ -4,7 +4,7 @@
  
 | Offset   | Size | Value       | Description                          |
 |----------|------|-------------|--------------------------------------|
-| 0x000000 |  440 |     mbr.asm | MBR                                  |
+| 0x000000 |  440 |  stage1.asm | MBR                                  |
 | 0x0001B8 |    4 |             | Disk signature                       |
 | 0x0001BC |    2 |             | unsed                                |
 | 0x0001BE |    1 |          80 | 0xPartition #1 flags                 |

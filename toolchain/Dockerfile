@@ -13,6 +13,8 @@ RUN apt-get install -y udev
 RUN apt-get install -y bochs bochsbios bochs-x vgabios
 RUN apt-get install -y sudo
 RUN apt-get install -y dosfstools
+RUN apt-get install -y xxd
+
 COPY trainos.sudoer /etc/sudoers.d/trainos
 
 RUN mkdir -p /trainos

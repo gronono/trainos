@@ -1,14 +1,23 @@
-bits 16
+;
+; Read FAT partition to load stage2
+;
+; We cannot assume that stage1 is loaded from our MBR
+;
 
 ; End of Line \r\n
 %define EOL                     0x0D, 0x0A
 ; Magic breakpoint from Bochs
 %define BREAKPOINT              xchg bx, bx
 
-BREAKPOINT
-mov si, msg_hello
-call print_string
+bits 16 ; Real mode
+org 0   ; Tell nasm do not translate addresses
 
+begin:
+    BREAKPOINT
+
+    mov si, msg_hello
+    call print_string
+    
 halt:
     cli
     mov si, msg_halt

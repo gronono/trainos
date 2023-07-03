@@ -15,7 +15,6 @@ clean:
 
 .PHONY: .build_modules
 .build_modules:
-	@make --directory ${SOURCE_DIR}/mbr build
 	@make --directory ${SOURCE_DIR}/stage1 build
 	@make --directory ${SOURCE_DIR}/stage2 build
 
