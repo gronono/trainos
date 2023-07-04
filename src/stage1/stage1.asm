@@ -2,7 +2,7 @@
 ; Create the bootloader inside the Master Boot Record.
 ; Load and execute stage2
 ;
-
+[map all /trainos/build/stage1.map]
 bits 16 ; This bootloader is executed on real mode so in 16 bits
 org 0   ; Tell nasm do not translate addresses
 
@@ -82,15 +82,20 @@ start:
     ;
     ; Switch to protected mode
     ;
-    BREAKPOINT
     call enable_a20
-    
-    
-    ; Jump to stage 2 at 0x0800
-    mov ax, 0x80
-    mov ds, ax
-    mov es, ax
-    jmp 0x80:0
+    ; load Global Descriptor Table
+    lgdt [gdtDesc]  ; +0x0600 because we relocated ourself at 0x0600
+    ; set protection enable flag in CR0
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+
+    ; Far jump to stage 2
+    ; in protected mode, address are formed by segment:offset
+    ; where segment is the entry offset in GDT, and offset is the offset in this entry
+    ; because we aligned GDT segments with actual memory
+    ; we jump to the second segment with the offset of stage 2.
+    jmp 08h:0x0800   ; 0x08 = second segment, 0x0800 = stage2
 
 disk_error:
     mov si, msg_disk_error
@@ -151,7 +156,6 @@ enable_a20:
     out KdbCommandPort, al
 
     call a20_wait_input
-    sti
     ret
 
 a20_wait_input:
@@ -169,9 +173,42 @@ a20_wait_output:
     jz a20_wait_output
     ret
 
+gdtTable:
+    ; NULL descriptor
+    dq 0
+    ; 32-bit code segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF for full 32-bit range
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
+    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+    ; 32-bit data segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF for full 32-bit range
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
+    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+    ; 16-bit code segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
+    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+    ; 16-bit data segment
+    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF
+    dw 0                        ; base (bits 0-15) = 0x0
+    db 0                        ; base (bits 16-23)
+    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
+    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
+    db 0                        ; base high
+gdtDesc: 
+    dw gdtDesc - gdtTable - 1   ; size of GDT -1
+    dd (gdtTable + 0x0600)      ; address of GDT (; +0x0600 because we relocated ourself at 0x0600)
+
 msg_halt:                   db 'Halt!', EOL, 0
-msg_no_bootable_partition:  db 'No bootable partition!', EOL, 0
-msg_yep:                    db 'YEP :)', 0
 msg_disk_error              db 'Disk error!', EOL, 0
 disk_dap:
     .packet_size            db  0x10
@@ -183,6 +220,6 @@ disk_dap:
 
 end:
 ; Fill the rest of space with zeros
-times 440 - 2 - ( end - begin ) db 0
-; (reserve 2 bytes for stage2 length)
+; = MBR size - signature length - 4 partition entries of 16 bytes - 2 bytes reserved for stage2 length
+times 512 - 2 - 4 * 16 - 2 - ( end - begin ) db 0
 stage2_size:                

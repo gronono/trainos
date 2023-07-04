@@ -52,3 +52,4 @@ try mkdir -p build/disk
 try sudo mount "${PARTITION_DEVICE}" build/disk
 try sudo umount build/disk
 try sudo losetup -d "${LOOP_DEVICE}"
+try rm -rf build/disk

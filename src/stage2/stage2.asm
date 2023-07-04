@@ -9,12 +9,13 @@
 ; Magic breakpoint from Bochs
 %define BREAKPOINT              xchg bx, bx
 
-bits 16 ; Real mode
+[map all /trainos/build/stage2.map]
+bits 32 ; Protected mode
 org 0   ; Tell nasm do not translate addresses
 
 begin:
     BREAKPOINT
-
+    sti
     mov si, msg_hello
     call print_string
     
