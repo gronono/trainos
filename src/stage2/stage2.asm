@@ -8,46 +8,59 @@
 %define EOL                     0x0D, 0x0A
 ; Magic breakpoint from Bochs
 %define BREAKPOINT              xchg bx, bx
-
+; VGA address
+%define SCREEN_BUFFER           0xB8000
 [map all /trainos/build/stage2.map]
 bits 32 ; Protected mode
-org 0   ; Tell nasm do not translate addresses
+org 0x0800
 
 begin:
-    BREAKPOINT
+    ; Reset segment registers to use the 32-bit data segment of GDT
+    mov eax, 0x10   ; offset 16
+    mov ds, eax
+    mov es, eax
+    mov fs, eax
+    mov gs, eax
+    mov ss, eax
+    ; clear direction flag
+    cld
+    ; enable interrupt
     sti
-    mov si, msg_hello
+
+
+    ; print hello 
+    BREAKPOINT
+    mov esi, msg_hello
     call print_string
     
 halt:
     cli
-    mov si, msg_halt
-    call print_string
     hlt
+    jmp halt
 
 ;
-; Print a zero-terminated string by calling 0x10 BIOS interruption
+; Print a zero-terminated string
 ; Input:
-; - si : points to the string
+; - esi : points to the string
 ; Ouput:
-; - si : points to next address after the end of the string
+; - esi : points to next address after the end of the string
 print_string:
-    push ax ; al / ah
-    push bx ; bh
+    push eax
+    push edi
 
-    .loop:
-        lodsb           ; al = next character, si++
-        cmp al, 0       ; test if al = 0 (ie end of string)
-        je .done        ; if true then jump to done
-        mov ah, 0x0E    ; 0x0E = BIOS teletype    
-        mov bh, 0       ; set page number to 0
-        int 0x10        ; call BIOS interruption
-        jmp .loop       ; continue looping
-    
-    .done:
-        pop bx
-        pop ax
-        ret
+    mov edi, SCREEN_BUFFER
+.loop:
+    lodsb           ; al = next character, si++
+    or al, al       ; test if al = 0 (ie end of string)
+    jz .done        ; if true, break the loop
+    mov [edi], al   ; copy current character into video buffer
+    inc edi
+    inc edi
+    jmp .loop
+.done:
+    pop eax
+    pop edi
+    ret
 
 msg_halt:                   db 'Halt!', EOL, 0
 msg_hello:                  db 'Hello Stage2!', EOL, 0
