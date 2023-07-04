@@ -7,17 +7,24 @@ bits 16 ; This bootloader is executed on real mode so in 16 bits
 org 0   ; Tell nasm do not translate addresses
 
 ; End of Line \r\n
-%define EOL                     0x0D, 0x0A
+%define EOL                         0x0D, 0x0A
 ; Magic breakpoint from Bochs
-%define BREAKPOINT              xchg bx, bx
+%define BREAKPOINT                  xchg bx, bx
+
+; Some Keyboard controller constantes
+%define KdbDataPort                 0x60
+%define KdbCommandPort              0x64
+%define KdbDisable                  0xAD
+%define KdbEnable                   0xAE
+%define KdbReadPort                 0xD0
+%define KdbWritePort                0xD1
 
 begin:
     ; Because we are not ready
     ; Disable interrupts
     cli
     
-    ; Because we will copy the bootable partition at standard address 0x7C00
-    ; we need to copy our self 0x0600
+    ; Copy our self 0x0600
     ; movsb copy from DS:SI to ES:DI
     ; set DS from our source
     mov ax, 0x07C0  ; 0x07C0:0 = 0x07C0 * 0x10 + 0 = 0x7C00
@@ -72,6 +79,13 @@ start:
     int 0x13
     jc disk_error
 
+    ;
+    ; Switch to protected mode
+    ;
+    BREAKPOINT
+    call enable_a20
+    
+    
     ; Jump to stage 2 at 0x0800
     mov ax, 0x80
     mov ds, ax
@@ -107,6 +121,53 @@ print_string:
         pop bx
         pop ax
         ret
+
+enable_a20:
+    cli
+
+    call a20_wait_input
+    mov al, KdbDisable
+    out KdbCommandPort, al
+
+    call a20_wait_input
+    mov al, KdbReadPort
+    out KdbCommandPort, al
+    
+    call a20_wait_output
+    in al, KdbDataPort
+    push eax
+
+    call a20_wait_input
+    mov al, KdbWritePort
+    out KdbCommandPort, al
+
+    call a20_wait_input
+    pop eax
+    or al, 2            ; bit 2 = A20 bit
+    out KdbDataPort, al
+
+    call a20_wait_input
+    mov al, KdbEnable
+    out KdbCommandPort, al
+
+    call a20_wait_input
+    sti
+    ret
+
+a20_wait_input:
+    ; wait until status bit 2 (input buffer) is 0
+    ; by reading from command port, we read status byte
+    in al, KdbCommandPort
+    test al, 2
+    jnz a20_wait_input
+    ret
+    
+a20_wait_output:
+    ; wait until status bit 1 (output buffer) is 1 so it can be read
+    in al, KdbCommandPort
+    test al, 1
+    jz a20_wait_output
+    ret
 
 msg_halt:                   db 'Halt!', EOL, 0
 msg_no_bootable_partition:  db 'No bootable partition!', EOL, 0
