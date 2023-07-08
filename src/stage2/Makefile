@@ -23,18 +23,15 @@ clean:
 	rm -rf ${BUILD_DIR}/stage2.bin
 
 ${BUILD_DIR}/stage2.bin: $(OBJECTS_ASM) $(OBJECTS_C)
-	@echo "--> Created  stage2.bin"
 	i686-elf-gcc -T linker.ld ${LINK_FLAGS} -Wl,-Map=$(BUILD_DIR)/stage2.map -o $@ $^ -lgcc
 
 $(BUILD_DIR)/stage2/c/%.o: %.c
 	@mkdir -p $(@D)
 	i686-elf-gcc ${COMPILE_FLAGS} -o $@ $<
-	@echo "--> Compiled: " $<
 
 $(BUILD_DIR)/stage2/asm/%.o: %.asm
 	@mkdir -p $(@D)
 	nasm -f elf -o $@ $<
-	@echo "--> Compiled: " $<
 
 .prebuild:
 	@mkdir -p ${BUILD_DIR}
