@@ -95,7 +95,7 @@ start:
     ; where segment is the entry offset in GDT, and offset is the offset in this entry
     ; because we aligned GDT segments with actual memory
     ; we jump to the second segment with the offset of stage 2.
-    jmp 08h:0x0800   ; 0x08 = second segment, 0x0800 = stage2
+    jmp 0x08:0x0800   ; 0x08 = second segment, 0x0800 = stage2
 
 disk_error:
     mov si, msg_disk_error
@@ -219,7 +219,9 @@ disk_dap:
     .lba                    dq  0x00000000
 
 end:
-; Fill the rest of space with zeros
+
 ; = MBR size - signature length - 4 partition entries of 16 bytes - 2 bytes reserved for stage2 length
-times 512 - 2 - 4 * 16 - 2 - ( end - begin ) db 0
-stage2_size:                
+; Fill the rest of space with zeros
+times 440 - ( end - begin ) - 2 db 0
+stage2_size: ; 2 bytes
+
