@@ -6,9 +6,9 @@ include ../../Makefile.inc
 # -ffreestanding freestanding environnement
 # -c do not link
 COMPILE_FLAGS=-std=c17 -g -nostdinc -ffreestanding -c
-# -nodefaultlibs
-# -nostdlib
-LINK_FLAGS=""
+# -nodefaultlibs do not use standard system librairies
+# -nostdlib do not use standard system startup file (cri0.o)
+LINK_FLAGS=-nodefaultlibs -nostdlib
 
 SOURCES_C=$(wildcard *.c)
 SOURCES_ASM=$(wildcard *.asm)
