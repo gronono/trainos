@@ -1,8 +1,8 @@
-#include <stdint.h>
+#include "typedefs.h"
 
 uint8_t* g_ScreenBuffer = (uint8_t*) 0xB8000;
 
-void __attribute__((cdecl)) start() {
+void start() {
     g_ScreenBuffer[0] = 'H';
     g_ScreenBuffer[2] = 'E';
     g_ScreenBuffer[4] = 'L';

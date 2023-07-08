@@ -6,8 +6,6 @@
 %define EOL                     0x0D, 0x0A
 ; Magic breakpoint from Bochs
 %define BREAKPOINT              xchg bx, bx
-; VGA address
-%define SCREEN_BUFFER           0xB8000
 
 bits 32 ; Protected mode
 section .entry
@@ -27,7 +25,6 @@ entry:
     cld
 
     ; Call start in main.c
-    BREAKPOINT
     call start
     
 halt:

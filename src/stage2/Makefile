@@ -1,5 +1,15 @@
 include ../../Makefile.inc
 
+# -std=c17 use C version defined in ISO/IEC 9899:2018
+# -g add debug symbols
+# -nostdinc do not seach for std directories for headers files
+# -ffreestanding freestanding environnement
+# -c do not link
+COMPILE_FLAGS=-std=c17 -g -nostdinc -ffreestanding -c
+# -nodefaultlibs
+# -nostdlib
+LINK_FLAGS=""
+
 SOURCES_C=$(wildcard *.c)
 SOURCES_ASM=$(wildcard *.asm)
 OBJECTS_C=$(patsubst %.c, $(BUILD_DIR)/stage2/c/%.o, $(SOURCES_C))
@@ -14,11 +24,11 @@ clean:
 
 ${BUILD_DIR}/stage2.bin: $(OBJECTS_ASM) $(OBJECTS_C)
 	@echo "--> Created  stage2.bin"
-	i686-elf-gcc -T linker.ld -nostdlib -Wl,-Map=$(BUILD_DIR)/stage2.map -o $@ $^ -lgcc
+	i686-elf-gcc -T linker.ld ${LINK_FLAGS} -Wl,-Map=$(BUILD_DIR)/stage2.map -o $@ $^ -lgcc
 
 $(BUILD_DIR)/stage2/c/%.o: %.c
 	@mkdir -p $(@D)
-	i686-elf-gcc -std=c99 -g -ffreestanding -nostdlib -c -o $@ $<
+	i686-elf-gcc ${COMPILE_FLAGS} -o $@ $<
 	@echo "--> Compiled: " $<
 
 $(BUILD_DIR)/stage2/asm/%.o: %.asm
