@@ -36,7 +36,8 @@ RUN cd /usr/src/gcc-build                           \
 
 RUN apt-get install -y bochs bochsbios bochs-x vgabios     
 RUN apt-get install -y dosfstools     
-RUN apt-get install -y file           
+RUN apt-get install -y file
+RUN apt-get install -y gdb           
 RUN apt-get install -y nasm           
 RUN apt-get install -y mtools         
 RUN apt-get install -y parted         

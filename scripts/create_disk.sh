@@ -20,7 +20,7 @@ SECTOR_SIZE=512
 STAGE2_SIZE=$(stat build/stage2.bin -c %s)
 STAGE2_SECTORS=$(( (STAGE2_SIZE + SECTOR_SIZE - 1 ) / SECTOR_SIZE ))
 info "Append stage2 size into stage1: size=${STAGE2_SECTORS}s"
-hexa=$(printf "%04x" 1 | fold -2 | sed 's/^/\\x/g' | tr '\n' ' ' | awk '{print $2$1}')
+hexa=$(printf "%04x" "${STAGE2_SECTORS}" | fold -2 | sed 's/^/\\x/g' | tr '\n' ' ' | awk '{print $2$1}')
 printf "%b" "$hexa" >> build/stage1.bin
 
 info "Create empty disk size=${DISK_SIZE}MiB"

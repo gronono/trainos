@@ -24,13 +24,13 @@ begin:
     ; Disable interrupts
     cli
     
-    ; Copy our self 0x0600
+    ; Copy our self 0x5600
     ; movsb copy from DS:SI to ES:DI
     ; set DS from our source
     mov ax, 0x07C0  ; 0x07C0:0 = 0x07C0 * 0x10 + 0 = 0x7C00
     mov ds, ax
     ; set es to our destination
-    mov ax, 0x0060 
+    mov ax, 0x0050  ; 0x0500:0 = 0x0050 x 0x10 + 0 = 0x500
     mov es, ax
     ; and set si and di offsets to 0
     mov si, 0
@@ -41,18 +41,22 @@ begin:
     rep movsb       
 
     ; Continue from our new location
-    jmp 0x0060:start
+    jmp 0x0050:start
 
 start:
-    ; because we move to 0x0600, DS should be 0x60
-    mov ax, 0x0060
+    ; Setup Data-Segment
+    ; Because we move to 0x0500, data will be at 0x0050:offset
+    mov ax, 0x0050
     mov ds, ax
 
-    ; Setup the stack juste before us
-    ; 0x50:0xFF = 0x05FF
-    mov sp, 0x00FF
-    mov ax, 0x0050
+    ; Setup Stack (goes downward)
+    ; To avoid conflict between our code and the stack
+    ; setup at the max available
+    ; 0x7FFFF = 0x7000 x 0x10 + 0xFFFF
+    mov ax, 0x7000
     mov ss, ax
+    mov sp, 0xFFFF
+    mov bp, sp
 
     ; Reset direction flag, so we know this value
     cld
@@ -64,14 +68,14 @@ start:
     ; Fill DAP
     mov ax, [stage2_size]
     mov word [disk_dap.number_of_sectors], ax
-    ; destination = 0:0x800 (0x600+512)
+    ; destination = 0:0x700 (0x500 + 512)
     mov word [disk_dap.buffer_segment], 0
-    mov word [disk_dap.buffer_offset], 0x800
+    mov word [disk_dap.buffer_offset], 0x700
     ; LBA of the partition = 2nd sector = 1
     mov eax, 1
     mov dword [disk_dap.lba], eax
-    ; Source = DS:SI = Addres of DAP
-    ; DS is already set at 0x60
+    ; Source = DS:SI = Address of DAP
+    ; DS is already set
     mov si, disk_dap
 
     ; Call read from LBA
@@ -84,10 +88,10 @@ start:
     ;
     call enable_a20
     ; load Global Descriptor Table
-    lgdt [gdtDesc]  ; +0x0600 because we relocated ourself at 0x0600
+    lgdt [gdt_descriptor]
     ; set protection enable flag in CR0
     mov eax, cr0
-    or al, 1
+    or eax, 1
     mov cr0, eax
 
     ; Far jump to stage 2
@@ -95,7 +99,7 @@ start:
     ; where segment is the entry offset in GDT, and offset is the offset in this entry
     ; because we aligned GDT segments with actual memory
     ; we jump to the second segment with the offset of stage 2.
-    jmp 0x08:0x0800   ; 0x08 = second segment, 0x0800 = stage2
+    jmp 0x08:0x0700   ; 0x08 = 2nd segment, 0x0700 = stage2
 
 disk_error:
     mov si, msg_disk_error
@@ -173,40 +177,27 @@ a20_wait_output:
     jz a20_wait_output
     ret
 
-gdtTable:
+gdt_start:
     ; NULL descriptor
     dq 0
-    ; 32-bit code segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF for full 32-bit range
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
-    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
-    ; 32-bit data segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF for full 32-bit range
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
-    db 11001111b                ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
-    ; 16-bit code segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
-    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
-    ; 16-bit data segment
-    dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFF
-    dw 0                        ; base (bits 0-15) = 0x0
-    db 0                        ; base (bits 16-23)
-    db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
-    db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
-    db 0                        ; base high
-gdtDesc: 
-    dw gdtDesc - gdtTable - 1   ; size of GDT -1
-    dd (gdtTable + 0x0600)      ; address of GDT (; +0x0600 because we relocated ourself at 0x0600)
+gdt_code:
+    dw 0xFFFF    ; limit (bits 0-15) = 0xFFFF for full 32-bit range
+    dw 0x0       ; base (bits 0-15) = 0x0
+    db 0x0       ; base (bits 16-23)
+    db 10011010b ; access (present, ring 0, code segment, executable, direction 0, readable)
+    db 11001111b ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0x0       ; base high
+gdt_data:
+    dw 0xFFFF    ; limit (bits 0-15) = 0xFFFF for full 32-bit range
+    dw 0x0       ; base (bits 0-15) = 0x0
+    db 0x0       ; base (bits 16-23)
+    db 10010010b ; access (present, ring 0, data segment, executable, direction 0, writable)
+    db 11001111b ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
+    db 0x0       ; base high
+gdt_end:
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1  ; size (16 bit)
+    dd gdt_start + 0x500        ; address (32 bit) - beacuse we tell NASM do not translate address and we move to 0x500, we need to add 0x500.
 
 msg_halt:                   db 'Halt!', EOL, 0
 msg_disk_error              db 'Disk error!', EOL, 0

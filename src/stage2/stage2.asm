@@ -11,22 +11,40 @@ bits 32 ; Protected mode
 section .entry
 
 extern start
+extern __bss_start
+extern __end
+extern _init
 
 global entry
 entry:
-    ; Reset segment registers to use the 32-bit data segment of GDT
-    mov eax, 0x10   ; offset 16 (3rd segement)
-    mov ds, eax
-    mov es, eax
-    mov fs, eax
-    mov gs, eax
-    mov ss, eax
+    ; In protected move, segments use GDT
+    ; so we need to reset segments
+    mov eax, 0x10 ; offset 16 (3rd segement)
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    ; Reset stack
+    mov ebp, 0x7FFFF
+    mov esp, ebp	
+
     ; clear direction flag
     cld
 
+    ; clear bss (uninitialized data)
+;    mov edi, __bss_start
+;    mov ecx, __end
+;    sub ecx, edi
+;    mov al, 0
+;    rep stosb
+
     ; Call start in main.c
-    call start
+    BREAKPOINT
+    jmp start
     
+; Never call
 halt:
     cli
     hlt
