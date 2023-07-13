@@ -28,7 +28,7 @@ entry:
 
     ; Reset stack
     mov ebp, 0x7FFFF
-    mov esp, ebp	
+    mov esp, ebp
 
     ; clear direction flag
     cld
@@ -41,9 +41,8 @@ entry:
 ;    rep stosb
 
     ; Call start in main.c
-    BREAKPOINT
     jmp start
-    
+
 ; Never call
 halt:
     cli

@@ -22,6 +22,7 @@ enum VGAColor {
 };
 
 void vga_text_initialize();
-void vga_text_set_cursor_colors(const enum VGAColor foreground, const enum VGAColor background);
+void vga_text_set_colors(const enum VGAColor foreground, const enum VGAColor background);
+void vga_text_set_position(const uint8_t row, const uint8_t column);
 void vga_text_putc(const uint8_t character);
 void vga_text_puts(const uint8_t* string);

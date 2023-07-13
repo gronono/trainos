@@ -1,4 +1,4 @@
-#pragma one
+#pragma once
 
 typedef unsigned char uint8_t;
 typedef signed char int8_t;
