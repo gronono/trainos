@@ -1,3 +1,8 @@
+#
+# Local Makefile
+# Use docker trainos:build image.
+#
+
 include ./Makefile.inc
 DOCKER_GUI_ARGS := -v /tmp/.X11-unix:/tmp/.X11-unix -v ${HOME}/.Xauthority:/home/trainos/.Xauthority -e DISPLAY=${DISPLAY}
 

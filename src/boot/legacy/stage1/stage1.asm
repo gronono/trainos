@@ -2,7 +2,7 @@
 ; Create the bootloader inside the Master Boot Record.
 ; Load and execute stage2
 ;
-[map all /trainos/build/stage1.map]
+[map all /trainos/build/boot/legacy/stage1.map]
 bits 16 ; This bootloader is executed on real mode so in 16 bits
 org 0   ; Tell nasm do not translate addresses
 
@@ -23,7 +23,7 @@ begin:
     ; Because we are not ready
     ; Disable interrupts
     cli
-    
+
     ; Copy our self 0x5600
     ; movsb copy from DS:SI to ES:DI
     ; set DS from our source
@@ -36,9 +36,9 @@ begin:
     mov si, 0
     mov di, 0
     ; counter = 512 bytes = our size
-    mov cx, 512     
+    mov cx, 512
     ; repeat cx time: copy 1 byte from ds:si to es:di and increment si, di by one
-    rep movsb       
+    rep movsb
 
     ; Continue from our new location
     jmp 0x0050:start
@@ -60,10 +60,10 @@ start:
 
     ; Reset direction flag, so we know this value
     cld
-    
+
     ; Setup finished we enable interruption
     sti
-    
+
     ; Load stage 2
     ; Fill DAP
     mov ax, [stage2_size]
@@ -121,11 +121,11 @@ print_string:
         lodsb           ; al = next character, si++
         cmp al, 0       ; test if al = 0 (ie end of string)
         je .done        ; if true then jump to done
-        mov ah, 0x0E    ; 0x0E = BIOS teletype    
+        mov ah, 0x0E    ; 0x0E = BIOS teletype
         mov bh, 0       ; set page number to 0
         int 0x10        ; call BIOS interruption
         jmp .loop       ; continue looping
-    
+
     .done:
         pop bx
         pop ax
@@ -141,7 +141,7 @@ enable_a20:
     call a20_wait_input
     mov al, KdbReadPort
     out KdbCommandPort, al
-    
+
     call a20_wait_output
     in al, KdbDataPort
     push eax
@@ -169,7 +169,7 @@ a20_wait_input:
     test al, 2
     jnz a20_wait_input
     ret
-    
+
 a20_wait_output:
     ; wait until status bit 1 (output buffer) is 1 so it can be read
     in al, KdbCommandPort
