@@ -24,13 +24,14 @@ begin:
     ; Disable interrupts
     cli
 
-    ; Copy our self 0x5600
+    ; BIOS put us at 0x0000:0x7C00
+    ; Copy our self to 0x0500:0
     ; movsb copy from DS:SI to ES:DI
     ; set DS from our source
-    mov ax, 0x07C0  ; 0x07C0:0 = 0x07C0 * 0x10 + 0 = 0x7C00
+    mov ax, 0x07C0  ; 0x07C0:0 = 0x07C0 * 0x10 + 0
     mov ds, ax
     ; set es to our destination
-    mov ax, 0x0050  ; 0x0500:0 = 0x0050 x 0x10 + 0 = 0x500
+    mov ax, 0x0050  ; 0x0500:0 = 0x0050 * 0x10 + 0
     mov es, ax
     ; and set si and di offsets to 0
     mov si, 0
@@ -41,6 +42,7 @@ begin:
     rep movsb
 
     ; Continue from our new location
+    ; CS will be 0x0050
     jmp 0x0050:start
 
 start:
@@ -60,9 +62,6 @@ start:
 
     ; Reset direction flag, so we know this value
     cld
-
-    ; Setup finished we enable interruption
-    sti
 
     ; Display welcome message
     mov si, msg_welcome
@@ -91,7 +90,7 @@ start:
     ; Switch to protected mode
     ;
     call enable_a20
-    ; load Global Descriptor Table
+    ; load Global Descriptor Table (aligned with physical memory)
     lgdt [gdt_descriptor]
     ; set protection enable flag in CR0
     mov eax, cr0
@@ -182,22 +181,24 @@ a20_wait_output:
     ret
 
 gdt_start:
-    ; NULL descriptor
+    ; NULL descriptor (8 bytes)
     dq 0
 gdt_code:
+    ; start at 0x08
     dw 0xFFFF    ; limit (bits 0-15) = 0xFFFF for full 32-bit range
-    dw 0x0       ; base (bits 0-15) = 0x0
-    db 0x0       ; base (bits 16-23)
+    dw 0         ; base (bits 0-15) = 0x00
+    db 0         ; base (bits 16-23)
     db 10011010b ; access (present, ring 0, code segment, executable, direction 0, readable)
     db 11001111b ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
-    db 0x0       ; base high
+    db 0         ; base high
 gdt_data:
+    ; start at 0x16
     dw 0xFFFF    ; limit (bits 0-15) = 0xFFFF for full 32-bit range
-    dw 0x0       ; base (bits 0-15) = 0x0
-    db 0x0       ; base (bits 16-23)
+    dw 0         ; base (bits 0-15) = 0x0
+    db 0         ; base (bits 16-23)
     db 10010010b ; access (present, ring 0, data segment, executable, direction 0, writable)
     db 11001111b ; granularity (4k pages, 32-bit pmode) + limit (bits 16-19)
-    db 0x0       ; base high
+    db 0         ; base high
 gdt_end:
 gdt_descriptor:
     dw gdt_end - gdt_start - 1  ; size (16 bit)

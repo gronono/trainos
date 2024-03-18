@@ -20,11 +20,11 @@ entry:
     ; In protected move, segments use GDT
     ; so we need to reset segments
     mov eax, 0x10 ; offset 16 (3rd segement)
-    mov ds, ax
-    mov ss, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
+    mov ds, ax  ; data segment
+    mov ss, ax  ; stack segment
+    mov es, ax  ; extra segment
+    mov fs, ax  ; general purpose F segment
+    mov gs, ax  ; general purpose G segment
 
     ; Reset stack
     mov ebp, 0x7FFFF
