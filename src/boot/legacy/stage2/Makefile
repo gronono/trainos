@@ -19,12 +19,12 @@ OBJECTS_ASM=$(patsubst %.asm, $(BUILD_DIR)/boot/legacy/%.o, $(SOURCES_ASM))
 build: ${BUILD_DIR}/boot/legacy/stage2.bin
 
 ${BUILD_DIR}/boot/legacy/stage2.bin: $(OBJECTS_ASM) $(OBJECTS_C)
-	x86_64-elf-gcc -T linker.ld ${LINK_FLAGS} -Wl,-Map=$(BUILD_DIR)/boot/legacy/stage2.map -o $@ $^
+	${GCC_COMPILER} -T linker.ld ${LINK_FLAGS} -Wl,-Map=$(BUILD_DIR)/boot/legacy/stage2.map -o $@ $^
 
 $(BUILD_DIR)/boot/legacy/%.o: %.c
 	mkdir -p $(@D)
-	x86_64-elf-gcc ${COMPILE_FLAGS} -o $@ $<
+	${GCC_COMPILER} ${COMPILE_FLAGS} -o $@ $<
 
 $(BUILD_DIR)/boot/legacy/%.o: %.asm
 	mkdir -p $(@D)
-	nasm -f elf64 -o $@ $< -w+orphan-labels
+	${NASM_COMPILER} -f ${EXE_FORMAT} -o $@ $< -w+orphan-labels

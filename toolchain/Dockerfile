@@ -1,21 +1,21 @@
 FROM debian:bookworm
 
+# Target OS architecture
+ARG TARGET=i386-elf
+# Trainos user id and group id
+# Same as your current user for Docker volume permissions
+# See Makefile
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
 # Binutils version
 # See https://ftp.gnu.org/gnu/binutils/
 ARG BINUTILS_VERSION=2.42
 # GGC version
 # See https://bigsearcher.com/mirrors/gcc/releases/?C=M;O=D
 ARG GGC_VERSION=13.2.0
-# Target CPU architecture
-ARG TARGET=x86_64-elf
 # Path of cross compiler tools
-ARG TARGET_PATH=/opt/trainos/x86_64-elf
-
-# Trainos user id and group id
-# Same as your current user for Docker volume permissions
-# See Makefile
-ARG USER_ID=1000
-ARG GROUP_ID=1000
+ARG TARGET_PATH=/opt/trainos/${TARGET}
 
 # Adding cross compiler tools into $PATH
 ENV PATH="${TARGET_PATH}/bin:$PATH"
@@ -55,9 +55,10 @@ RUN cd /usr/src/gcc-build                           \
     && ../gcc-${GGC_VERSION}/configure              \
         --disable-nls		                        \
         --enable-languages=c                        \
+        --disable-bootstrap                         \
+        --without-headers                           \
         --prefix=${TARGET_PATH}                     \
         --target=${TARGET}                          \
-        --without-headers                           \
     && make -j 9 all-gcc all-target-libgcc          \
     && make install-gcc install-target-libgcc
 
@@ -73,6 +74,8 @@ RUN apt-get install -y qemu-system-x86
 RUN apt-get install -y sudo
 RUN apt-get install -y xxd
 RUN apt-get install -y udev
+RUN apt-get install -y vim
+RUN apt-get install -y git
 
 WORKDIR /trainos
 VOLUME [ "/trainos" ]

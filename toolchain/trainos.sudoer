@@ -1,5 +1,1 @@
-trainos ALL = (root) NOPASSWD: /sbin/losetup
-trainos ALL = (root) NOPASSWD: /sbin/mkfs.fat
-trainos ALL = (root) NOPASSWD: /bin/mount
-trainos ALL = (root) NOPASSWD: /bin/umount
-trainos ALL = (root) NOPASSWD: /bin/cp
+trainos ALL=(ALL) NOPASSWD: ALL

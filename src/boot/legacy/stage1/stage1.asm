@@ -64,6 +64,10 @@ start:
     ; Setup finished we enable interruption
     sti
 
+    ; Display welcome message
+    mov si, msg_welcome
+    call print_string
+
     ; Load stage 2
     ; Fill DAP
     mov ax, [stage2_size]
@@ -199,7 +203,7 @@ gdt_descriptor:
     dw gdt_end - gdt_start - 1  ; size (16 bit)
     dd gdt_start + 0x500        ; address (32 bit) - beacuse we tell NASM do not translate address and we move to 0x500, we need to add 0x500.
 
-msg_halt:                   db 'Halt!', EOL, 0
+msg_welcome                 db 'Booting TRAINOS!', EOL, 0
 msg_disk_error              db 'Disk error!', EOL, 0
 disk_dap:
     .packet_size            db  0x10

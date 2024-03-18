@@ -1,6 +1,22 @@
+#
+# Customizable configuration
+#
+
+# Architecture target (i386-elf or x86_64-elf)
+OS_TARGET           := i386-trainos-elf
+# OS_TARGET           := x86_64-elf
+# EXE format (elf or elf64)
+EXE_FORMAT          := elf
+# EXE_FORMAT          := elf64
+
+# Define how big is generated disk
+DISK_SIZE           := 64
+
+# Common configuration
 ROOT_DIR            := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR           := $(abspath ${ROOT_DIR}/build)
 SOURCE_DIR          := $(abspath ${ROOT_DIR}/src)
 OS_NAME             := trainos
-BUILD_IMAGE_NAME    := ${OS_NAME}:build
-DISK_SIZE           := 64
+BUILD_IMAGE_NAME    := ${OS_NAME}-toolchain:${OS_TARGET}
+GCC_COMPILER        := /opt/trainos/${OS_TARGET}/bin/${OS_TARGET}-gcc
+NASM_COMPILER       := /usr/bin/nasm

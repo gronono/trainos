@@ -7,4 +7,4 @@ GROUP_ID := $(shell id -g)
 
 .PHONY: build
 build:
-	docker build --build-arg USER_ID=${USER_ID} --build-arg GROUP_ID=${GROUP_ID} -t ${BUILD_IMAGE_NAME} .
+	docker build --build-arg USER_ID=${USER_ID} --build-arg GROUP_ID=${GROUP_ID} --build-arg TARGET=${OS_TARGET} -t ${BUILD_IMAGE_NAME} .
