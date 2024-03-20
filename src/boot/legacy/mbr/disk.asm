@@ -16,7 +16,6 @@ load_vbr:
     mov dl, 0x80
     mov ah, 0x42
     int 0x13
-    BREAKPOINT
     ret
 
 is_bootable:

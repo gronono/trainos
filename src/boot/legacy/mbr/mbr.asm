@@ -69,8 +69,7 @@ select:
 
     mov si, msg_boot_next
     call print_string
-    BREAKPOINT  ; 0x0000:0x7C00 should starts with EB 3C 90
-    jmp 0x0000:0x7C00
+    jmp 0x0000:0x7C00   ; jump to the VBR
 
     .disk_error:
         mov si, msg_disk_error
@@ -93,7 +92,7 @@ msg_welcome     db 'TrainOS MBR', EOL, EOL, 0
 msg_partition   db ' Partition #', 0
 msg_no_bootable db 'No bootable partition', EOL, 0
 msg_disk_error  db 'Disk Error!', EOL, 0
-msg_boot_next   db 'Volume Boot Record...', 0
+msg_boot_next   db 'Volume Boot Record...', EOL, 0
 msg_eol         db EOL, 0
 msg_crlf        db CR, LF, 0
 selected_menu   db 0
