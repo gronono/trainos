@@ -1,7 +1,7 @@
 ; Load Volume Boot Record
 load_vbr:
     ; Compute the LBA address
-    ; = FIRST_BOOT_FLAG_ADDR + (selected * PARTITION_ENTRY_SIZE) + LBA_ADDR_OFFSET
+    ; = PARTITION_TABLE_OFFSET + (selected * PARTITION_ENTRY_SIZE) + LBA_ADDR_OFFSET
     ; = 0x1BE + (selected * 10) + 0x08
     ; for the 1st partition : 0x1BE + 0x08 =  0x01C6
     ; should be 0x800 = 2048th sector (because parted alignment)
@@ -9,7 +9,7 @@ load_vbr:
     mov bx, [selected_menu]
     mov eax, PARTITION_ENTRY_SIZE
     mul bx
-    add eax, (FIRST_BOOT_FLAG_ADDR + LBA_ADDR_OFFSET)
+    add eax, (ORIGIN_ADDR + PARTITION_TABLE_OFFSET + LBA_ADDR_OFFSET)
     mov ebx, eax
     mov eax, dword [ds:ebx]
     mov dword [disk_dap.lba], eax
@@ -25,7 +25,7 @@ load_vbr:
 is_bootable:
     mov ax, PARTITION_ENTRY_SIZE
     mul cx
-    add ax, FIRST_BOOT_FLAG_ADDR
+    add ax, (ORIGIN_ADDR + PARTITION_TABLE_OFFSET + BOOT_FLAG_OFFSET)
     mov bx, ax
     mov bl, [bx]
     cmp bl, BOOT_FLAG_ENABLED
@@ -35,7 +35,7 @@ is_bootable:
 disk_dap:
     .size       db  0x10
     .reserved   db  0x00
-    ; 1st sector = 512 bytes
+    ; number of sectors (1 sector = 512 bytes)
     .sectors    dw  0x0001
     ; destination = 0x0000:0x7C00
     .offset     dw  0x7C00

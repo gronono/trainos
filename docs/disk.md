@@ -39,5 +39,4 @@
 | 0x100027              | 4    |             | VolumeID 'Serial' number            |
 | 0x10002B              | 11   | TRAINOS     | Volume label string                 |
 | 0x100036              | 8    | FAT16       | System identifier string            |
-| 0x10003E              | 448  | stage1      | Stage 1 boot code                   |
-| 0x1000FE              | 2    | AA 55       | Boot signature                      |
+| 0x10003E              | 450  | vbr         | Volume Boot Record code             |

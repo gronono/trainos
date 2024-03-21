@@ -1,15 +1,37 @@
 ENTRY(entry)
 OUTPUT_FORMAT("binary")
-phys = 0x503E;  # Skip FAT16 headers (0x500 + 0x3E)
 
 SECTIONS
 {
-    . = phys;
+    /*
+     * Because we relocate us at 0x0500 (see boot.asm)
+     * but we have to skip FAT16 headers (0x3E)
+     * the physical starting address is 0x500 + 0x3E
+     */
+    . = 0x053E;
 
-    .entry  : { __entry_start  = .; *(.entry)  }
-    .text   : { __text_start   = .; *(.text)   }
-    .data   : { __data_start   = .; *(.data)   }
-    .rodata : { __rodata_start = .; *(.rodata) }
-    .bss    : { __bss_start    = .; *(.bss)    }
-    __end = .;
+    /* boot.asm */
+    .boot : {
+        *(.boot)
+    }
+
+    /* start C function */
+    .start : {
+        *(.start)
+    }
+
+    /** text = code C */
+    .text : {
+        *(.text)
+    }
+
+    /** data = initialized data */
+    .data : {
+        *(.data)
+    }
+
+    /** bss = initialized data */
+    .bss : {
+        *(.bss)
+    }
 }

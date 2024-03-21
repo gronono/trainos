@@ -43,8 +43,7 @@ mov cr0, eax
 ; Because we aligned GDT segments with physical memory
 ; we jump to the code segment with an offset.
 ; The next instruction is located at end_protected_mode
-; but we relocated our self at 0x500 so we need to add this value.
-jmp GDT_CODE:(0x500 + end_protected_mode)
+jmp GDT_CODE:end_protected_mode
 
 a20_wait_input:
     ; wait until status bit 2 (input buffer) is 0
@@ -67,3 +66,6 @@ end_protected_mode:
     ; Reset stack
     mov ebp, 0x7FFFF
     mov esp, ebp
+    mov ax, GDT_DATA
+    mov ss, ax
+

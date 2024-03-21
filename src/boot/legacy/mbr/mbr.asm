@@ -6,8 +6,8 @@
 
 ; NASM directives
 [map all /trainos/build/boot/legacy/mbr.map]
-bits 16 ; CPU starts in real mode
-org 0   ; Do not translate addresses
+bits 16      ; CPU starts in real mode
+org 0x0500   ; Will moved to 0x500 so set origin to that
 
 %include "../lib/symbols.asm"
 

@@ -32,11 +32,11 @@ init:
     mov bp, sp
 
     ; Continue from our new location
-    ; CS will be 0x0050
-    jmp 0x0050:start
+    ; CS will be 0x0000
+    jmp 0x0000:after_move
 
-start:
-    ; Setup Data-Segment
-    ; Because we move to 0x0500, data will be at 0x0050:offset
-    mov ax, 0x0050
-    mov ds, ax
+after_move:
+    ; Reset segments
+    mov ax, 0
+    mov ds, ax  ; Data Segment
+    mov es, ax  ; Extra Segment
