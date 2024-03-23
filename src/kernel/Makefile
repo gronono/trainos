@@ -4,12 +4,12 @@ include ../../Makefile.inc
 # -nostdinc do not seach for std directories for headers files
 # -ffreestanding freestanding environnement
 # -c do not link
-COMPILE_FLAGS=-std=c17 -nostdinc -ffreestanding -c
+COMPILE_FLAGS=-std=c18 -nostdinc -ffreestanding -c
 # -nodefaultlibs do not use standard system librairies
 # -nostdlib do not use standard system startup file (cri0.o)
 LINK_FLAGS=-nodefaultlibs -nostdlib
 
-SOURCES_C=$(wildcard *.c)
+SOURCES_C=$(shell find . -type f -name '*.c')
 OBJECTS_C=$(patsubst %.c, $(BUILD_DIR)/kernel/%.o, $(SOURCES_C))
 
 .PHONY: build
