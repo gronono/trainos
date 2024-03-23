@@ -99,8 +99,11 @@ void vga_text_put_char(const char character) {
     update_position();
 }
 
-void vga_text_put_string(const char* string) {
-    print(vga_text_put_char, string);
+void vga_text_put_string(const char* format, ...) {
+    va_list vargs;
+    va_start(vargs, format);
+    print(vga_text_put_char, format, vargs);
+    va_end(vargs);
 }
 
 void vga_clear_screen() {

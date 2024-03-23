@@ -26,4 +26,4 @@ void vga_clear_screen();
 void vga_text_set_colors(const enum VGAColor foreground, const enum VGAColor background);
 void vga_text_set_position(const uint8_t row, const uint8_t column);
 void vga_text_put_char(const char character);
-void vga_text_put_string(const char* string);
+void vga_text_put_string(const char* format, ...);

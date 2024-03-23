@@ -6,6 +6,9 @@ void console_init(const PutCharFct put_char_fct) {
     console_put_char_fct = put_char_fct;
 }
 
-void console_print(const char* string) {
-    print(console_put_char_fct, string);
+void console_print(const char* format, ...) {
+    va_list vargs;
+    va_start(vargs, format);
+    print(console_put_char_fct, format, vargs);
+    va_end(vargs);
 }
