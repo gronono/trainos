@@ -73,11 +73,18 @@ void vga_text_put_char(const char character) {
         // new line
         cursor->row++;
         cursor->column = 0;
-    } else {
+    } else if (character == '\b' && cursor->column > 0) {
+        // backspace
+        cursor->column--;
+        vga_text_put_char(' ');
+        cursor->column--;
+    } else if (character >= ' ' && character <= '~') {
         uint16_t coloredChar = compute_cursor_char(character);
         uint16_t index = cursor->row * NB_COLS + cursor->column;
         vga_text_memory[index] = coloredChar;
         cursor->column++;
+    } else {
+        return;
     }
 
     if (cursor->column >= NB_COLS) {

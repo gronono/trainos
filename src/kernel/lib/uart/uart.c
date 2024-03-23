@@ -33,12 +33,10 @@ bool uart_init(const uint16_t port) {
 
 void uart_write(const uint16_t port, uint8_t c) {
     while (is_transmit_empty(port) == 0);
-
     port_write(port,c);
 }
 
 uint8_t uart_read(const uint16_t port) {
     while (received(port) == 0);
-
     return port_read(port);
 }
