@@ -5,3 +5,4 @@ bx_enh_dbg.ini
 /stdout.txt
 /utilities/disk/bin/
 /utilities/disk/obj/
+/cmake-build-debug/CMakeFiles/clion-Debug-log.txt
