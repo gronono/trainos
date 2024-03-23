@@ -7,7 +7,7 @@ __attribute__((section(".kmain"))) void kmain() {
     vga_text_init();
     console_init(vga_text_put_char);
 
-    debug("Starting %s %s %c %c..\n", "kernel", NULL, -10, 'A');
+    debug("%s,%s,%c,%c,%d,%d,%u,%u,0x%x,0x%X\n", "hello", NULL, -10, 'A', 10, -5, -2, 5782,42, 42);
     console_print("Starting kernel...\n");
 
     // Never returns from bootloader
