@@ -45,7 +45,6 @@ void vga_text_set_position(const uint8_t row, const uint8_t column) {
     update_position();
 }
 
-
 uint16_t compute_cursor_char(const uint8_t character) {
     uint8_t color = (cursor->background << 4) | cursor->foreground;
     return (color << 8) | character;
@@ -70,10 +69,17 @@ void vga_text_scroll() {
 }
 
 void vga_text_put_char(const char character) {
-    uint16_t coloredChar = compute_cursor_char(character);
-    uint16_t index = cursor->row * NB_COLS + cursor->column;
-    vga_text_memory[index] = coloredChar;
-    cursor->column++;
+    if (character == '\n') {
+        // new line
+        cursor->row++;
+        cursor->column = 0;
+    } else {
+        uint16_t coloredChar = compute_cursor_char(character);
+        uint16_t index = cursor->row * NB_COLS + cursor->column;
+        vga_text_memory[index] = coloredChar;
+        cursor->column++;
+    }
+
     if (cursor->column >= NB_COLS) {
         cursor->row++;
         cursor->column = 0;
@@ -92,7 +98,15 @@ void vga_text_put_string(const char* string) {
     }
 }
 
+void vga_clear_screen() {
+    for (int i = 0; i < NB_COLS * NB_ROWS; i++) {
+        vga_text_put_char(' ');
+    }
+    vga_text_set_position(0, 0);
+}
+
 void vga_text_init() {
     vga_text_set_colors(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_BLACK);
     vga_text_set_position(0, 0);
+    vga_clear_screen();
 }
