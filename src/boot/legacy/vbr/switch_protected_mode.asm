@@ -67,5 +67,9 @@ end_protected_mode:
     mov ebp, 0x7FFFF
     mov esp, ebp
     mov ax, GDT_DATA
-    mov ss, ax
+    mov ss, ax  ; Stack Segment
+    mov ds, ax  ; Data Segment
+    mov es, ax  ; Extra Segment
+    mov fs, ax  ; Additional Segment
+    mov gs, ax  ; Additional Segment
 
