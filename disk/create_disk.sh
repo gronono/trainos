@@ -49,7 +49,8 @@ try dd if=/trainos/build/boot/legacy/vbr.bin of="${DISK}" bs=1 seek=${VBR_START}
 info "Copy OS files"
 try mkdir -p /trainos/build/disk
 try sudo mount "${PARTITION_DEVICE}" /trainos/build/disk
-# TODO copy files
+try sudo mkdir -p /trainos/build/disk/system
+try sudo cp /trainos/build/kernel/kernel.bin /trainos/build/disk/system
 try sudo umount /trainos/build/disk
 try sudo losetup -d "${LOOP_DEVICE}"
 try rm -rf /trainos/build/disk

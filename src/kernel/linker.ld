@@ -1,0 +1,30 @@
+ENTRY(entry)
+OUTPUT_FORMAT("binary")
+
+SECTIONS
+{
+    /*
+     * Just after the VBR located at 0x500 + 1 sector (=512=0x200) = 0x700
+     */
+    . = 0x700;
+
+    /* The kmain function must be the first thing as required by VBR  */
+    .kmain : {
+        *(.kmain)
+    }
+
+    /** text = code C */
+    .text : {
+        *(.text)
+    }
+
+    /** data = initialized data */
+    .data : {
+        *(.data)
+    }
+
+    /** bss = initialized data */
+    .bss : {
+        *(.bss)
+    }
+}

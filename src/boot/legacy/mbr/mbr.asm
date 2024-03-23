@@ -16,9 +16,6 @@ begin:
 
     call menu_loop
 
-    ; just in case. Should not be call
-    hlt
-
 select:
     mov cx, [selected_menu]
     call is_bootable

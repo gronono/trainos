@@ -3,25 +3,20 @@
 ;
 ; The main goal of this file is to switch to protected mode
 ;
+[map all /trainos/build/boot/legacy/vbr.map]
+bits 16      ; CPU starts in real mode
+org 0x053E   ; Will moved to 0x500 so set origin to that
+
 %include "../lib/symbols.asm"
-
-bits 16 ; CPU starts in real mode
-extern start
-
-section .boot
 
 begin:
     %include "../lib/init.asm"
+
     mov si, msg_welcome
     call print_string
 
-    ; Only the first sector of our VBR is loaded into RAM
-    ; We need to load the next sectors
-    ; 0x500 (our location) is the start of the partition
-    mov eax, [ORIGIN_ADDR + FAT_HIDDEN_SECTORS_OFFSET]
-    add eax, 1  ;   next sector
-    mov [disk_dap.lba], eax
-    mov si, disk_dap
+    ; Load kernel into RAM
+    mov si, kernel_dap
     mov dl, 0x80
     mov ah, 0x42
     int 0x13
@@ -32,8 +27,8 @@ after_read:
     ; Switch to protected mode
     %include "./switch_protected_mode.asm"
 
-    ; Jump to start.c
-    jmp GDT_CODE:start
+    ; Jump to kmain.c
+    jmp GDT_CODE:0x700
 
 %include "../lib/print_string.asm"
 msg_welcome     db 'TrainOS VBR', EOL, EOL, 0
@@ -67,14 +62,18 @@ gdt_descriptor:
     dw gdt_end - gdt_start - 1  ; size (16 bit)
     dd gdt_start                ; address (32 bit)
 
-; Disk Address Packet
-disk_dap:
+; Kernel Disk Address Packet
+kernel_dap:
     .size       db  0x10
     .reserved   db  0x00
     ; number of sectors (1 sector = 512 bytes)
-    .sectors    dw  0x0001
+    .sectors    dw  0x0000
     ; destination = 0x0000:0x7C00
     .offset     dw  0x0700
     .segment    dw  0x0000
     ; LBA Address = index (zero based) of the first sector to read
-    .lba        dq  0x00000000
+    .lba        dq  0x0000086C  ; value is set on compile
+
+end:
+; Fill the rest of space with zeros
+times 450 - ( end - begin ) db 0
