@@ -14,3 +14,9 @@ typedef long long           int64_t;
 typedef uint8_t             bool;
 #define true	            1
 #define false	            0
+
+#ifdef __64BIT__
+typedef uint64_t            ptr_t;
+#else
+typedef uint32_t            ptr_t;
+#endif

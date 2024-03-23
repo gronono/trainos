@@ -4,6 +4,8 @@
 
 void debug_init() {
     uart_init(COM1);
+    debug("COM1 initialized\n");
+    debug("Pointer size: %d\n", sizeof(ptr_t));
 }
 
 void write_com1(const char c) {

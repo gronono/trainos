@@ -4,16 +4,11 @@
 
 __attribute__((section(".kmain"))) void kmain() {
     debug_init();
-
-    debug("Init VGA\n");
     vga_text_init();
-
-    debug("Init Console\n");
     console_init(vga_text_put_char);
-
     console_print("Starting kernel...\n");
 
     // Never returns from bootloader
-    debug("Never end loop\n");
+    debug("Kernel started\n");
     for (;;) {}
 }

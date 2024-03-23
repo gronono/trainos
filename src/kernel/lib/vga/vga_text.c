@@ -1,6 +1,7 @@
 #include "vga_text.h"
 #include "../port/port.h"
 #include "../strings/strings.h"
+#include "../debug/debug.h"
 
 #define VGA_CTRL_PORT   0x3D4
 #define VGA_DATA_PORT   0x3D5
@@ -114,6 +115,7 @@ void vga_clear_screen() {
 }
 
 void vga_text_init() {
+    debug("Init VGA - addr: %p\n", vga_text_memory);
     vga_text_set_colors(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_BLACK);
     vga_text_set_position(0, 0);
     vga_clear_screen();

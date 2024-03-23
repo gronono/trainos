@@ -40,6 +40,23 @@ void handle_integer(const PutCharFct put_char_fct, const int value, const uint8_
     }
 }
 
+void handle_pointer(const PutCharFct put_char_fct, const ptr_t pointer, const uint8_t flags) {
+    put_char_fct('0');
+    put_char_fct('x');
+
+    char* digits = lower_digits;
+    if (flags & FLAG_UPPERCASE) {
+        digits = upper_digits;
+    }
+
+    uint32_t value = pointer;
+    uint8_t size = sizeof(pointer);
+    for (uint8_t i = 0; i < (size * 2); i++) {
+        put_char_fct(digits[value >> (size * 8 - 4)]);
+        value = value << 4;
+    }
+}
+
 void handle_string(const PutCharFct put_char_fct, const char * value) {
     if (value == NULL) {
         print(put_char_fct, "(null)", NULL);
@@ -51,21 +68,16 @@ void handle_string(const PutCharFct put_char_fct, const char * value) {
     }
 }
 
-void print(const PutCharFct put_char_fct, const char * string, va_list vargs) {
-    if (string == NULL) {
-        // TODO Panic
-        return;
-    }
-
+void print(const PutCharFct put_char_fct, const char * format, va_list vargs) {
     char c;
-    for (uint8_t i = 0; (c = string[i]) != '\0'; i++) {
+    for (uint8_t i = 0; (c = format[i]) != '\0'; i++) {
         if (c != '%') {
             // standard char
             put_char_fct(c);
             continue;
         }
         // Found a formatted part
-        c = string[++i];
+        c = format[++i];
         if (c == 0) {
             // % is the last char of string
             put_char_fct('%');
@@ -81,6 +93,12 @@ void print(const PutCharFct put_char_fct, const char * string, va_list vargs) {
                 break;
             case 'o':
                 handle_integer(put_char_fct, va_arg(vargs, int), 8, 0);
+                break;
+            case 'p':
+                handle_pointer(put_char_fct, va_arg(vargs, ptr_t), 0);
+                break;
+            case 'P':
+                handle_pointer(put_char_fct, va_arg(vargs, ptr_t), FLAG_UPPERCASE);
                 break;
             case 's':
                 handle_string(put_char_fct, va_arg(vargs, char *));
@@ -103,6 +121,5 @@ void print(const PutCharFct put_char_fct, const char * string, va_list vargs) {
                 put_char_fct(c);
                 break;
         }
-
     }
 }
