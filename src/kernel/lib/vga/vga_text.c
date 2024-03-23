@@ -1,7 +1,5 @@
-#include "ports.h"
-#include "typedefs.h"
 #include "vga_text.h"
-#include "debug.h"
+#include "../port/port.h"
 
 #define VGA_CTRL_PORT   0x3D4
 #define VGA_DATA_PORT   0x3D5
@@ -71,7 +69,7 @@ void vga_text_scroll() {
     }
 }
 
-void vga_text_putc(const uint8_t character) {
+void vga_text_put_char(const char character) {
     uint16_t coloredChar = compute_cursor_char(character);
     uint16_t index = cursor->row * NB_COLS + cursor->column;
     vga_text_memory[index] = coloredChar;
@@ -87,14 +85,14 @@ void vga_text_putc(const uint8_t character) {
     update_position();
 }
 
-void vga_text_puts(const uint8_t* string) {
+void vga_text_put_string(const char* string) {
     while (*string != '\0') {
-        vga_text_putc(*string);
+        vga_text_put_char(*string);
         string++;
     }
 }
 
-void vga_text_initialize() {
+void vga_text_init() {
     vga_text_set_colors(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_BLACK);
     vga_text_set_position(0, 0);
 }

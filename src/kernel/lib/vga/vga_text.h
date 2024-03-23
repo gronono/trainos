@@ -1,6 +1,6 @@
 #pragma once
 
-#include "typedefs.h"
+#include "../typedefs.h"
 
 enum VGAColor {
     VGA_COLOR_BLACK = 0,
@@ -21,8 +21,8 @@ enum VGAColor {
     VGA_COLOR_WHITE = 15,
 };
 
-void vga_text_initialize();
+void vga_text_init();
 void vga_text_set_colors(const enum VGAColor foreground, const enum VGAColor background);
 void vga_text_set_position(const uint8_t row, const uint8_t column);
-void vga_text_putc(const uint8_t character);
-void vga_text_puts(const uint8_t* string);
+void vga_text_put_char(const char character);
+void vga_text_put_string(const char* string);
