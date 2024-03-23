@@ -18,7 +18,7 @@ uint8_t received(uint16_t port) {
     return inb(port + 5) & 1;
 }
 
-uint8_t uart_init(uint16_t port) {
+bool uart_init(uint16_t port) {
     outb(port + 1, 0x00);    // Disable all interrupts
     outb(port + 3, 0x80);    // Enable DLAB (set baud rate divisor)
     outb(port + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
@@ -31,13 +31,13 @@ uint8_t uart_init(uint16_t port) {
 
     // Check if serial is faulty (i.e: not same byte as sent)
     if (inb(port + 0) != 0xAE) {
-        return 1;
+        return false;
     }
 
     // If serial is not faulty set it in normal operation mode
     // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
     outb(port + 4, 0x0F);
-    return 0;
+    return true;
 }
 
 void uart_write(uint16_t port, uint8_t c) {
