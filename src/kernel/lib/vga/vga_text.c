@@ -1,5 +1,6 @@
 #include "vga_text.h"
 #include "../port/port.h"
+#include "../strings/strings.h"
 
 #define VGA_CTRL_PORT   0x3D4
 #define VGA_DATA_PORT   0x3D5
@@ -99,10 +100,7 @@ void vga_text_put_char(const char character) {
 }
 
 void vga_text_put_string(const char* string) {
-    while (*string != '\0') {
-        vga_text_put_char(*string);
-        string++;
-    }
+    print(vga_text_put_char, string);
 }
 
 void vga_clear_screen() {

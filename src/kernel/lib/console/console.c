@@ -1,7 +1,11 @@
 #include "console.h"
 
-void console_init() {
+static PutCharFct console_put_char_fct;
+
+void console_init(const PutCharFct put_char_fct) {
+    console_put_char_fct = put_char_fct;
 }
 
-void print(char* string) {
+void console_print(const char* string) {
+    print(console_put_char_fct, string);
 }
