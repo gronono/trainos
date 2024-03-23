@@ -5,7 +5,7 @@ void debug_init() {
     uart_init(COM1);
 }
 
-void debug(char* string) {
+void debug(const char* string) {
     while (*string != '\0') {
         uart_write(COM1, *string);
         string++;

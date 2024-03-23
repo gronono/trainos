@@ -3,4 +3,4 @@
 #define BREAKPOINT __asm__("xchgw %bx, %bx");
 
 void debug_init();
-void debug(char* string);
+void debug(const char* string);

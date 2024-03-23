@@ -1,24 +1,24 @@
 #include "uart.h"
 
-static inline unsigned char inb(uint16_t port) {
+static inline unsigned char inb(const uint16_t port) {
     unsigned char data;
     __asm__ volatile("inb %1, %0" : "=a" (data) : "Nd" (port));
     return data;
 }
 
-static inline void outb(uint16_t port, uint8_t data) {
+static inline void outb(const uint16_t port, const uint8_t data) {
     __asm__ volatile("outb %0, %1" : : "a" (data), "Nd" (port));
 }
 
-uint8_t is_transmit_empty(uint16_t port) {
+bool is_transmit_empty(const uint16_t port) {
     return inb(port + 5) & 0x20;
 }
 
-uint8_t received(uint16_t port) {
+uint8_t received(const uint16_t port) {
     return inb(port + 5) & 1;
 }
 
-bool uart_init(uint16_t port) {
+bool uart_init(const uint16_t port) {
     outb(port + 1, 0x00);    // Disable all interrupts
     outb(port + 3, 0x80);    // Enable DLAB (set baud rate divisor)
     outb(port + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
@@ -40,13 +40,13 @@ bool uart_init(uint16_t port) {
     return true;
 }
 
-void uart_write(uint16_t port, uint8_t c) {
+void uart_write(const uint16_t port, uint8_t c) {
     while (is_transmit_empty(port) == 0);
 
     outb(port,c);
 }
 
-uint8_t uart_read(uint16_t port) {
+uint8_t uart_read(const uint16_t port) {
     while (received(port) == 0);
 
     return inb(port);
