@@ -33,6 +33,9 @@ void print(const PutCharFct put_char_fct, const char * string, va_list vargs) {
             break;
         }
         switch (c) {
+            case 'c':
+                put_char_fct(va_arg(vargs, int));
+                break;
             case 's':
                 handle_string(put_char_fct, va_arg(vargs, char *));
                 break;
