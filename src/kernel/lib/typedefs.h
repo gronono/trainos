@@ -37,7 +37,7 @@ typedef uint8_t             bool;
 /** Macro representing the boolean value false. */
 #define false	            0
 
-#ifdef __64BIT__
+#ifdef __x86_64__
 /** Defines the ptr_t type as uint64_t on 64-bit systems. */
 typedef uint64_t            ptr_t;
 #else
