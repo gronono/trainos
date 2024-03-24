@@ -8,6 +8,6 @@ call_int_15_e820:
     mov edx, 0x0534D4150         ; Magic number 0x80
     mov edi, 0x8004       ; Adresse de la structure de données (par exemple 0x9000)
     mov [es:di + 20], dword 1 ; force a valid ACPI 3.X entry
-BREAKPOINT
+    BREAKPOINT
     int 0x15              ; Appel de l'interruption 0x15
     ret

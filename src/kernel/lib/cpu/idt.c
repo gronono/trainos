@@ -1,6 +1,7 @@
 #include "idt.h"
 #include "../debug/debug.h"
 #include "interrupt.h"
+#include "../../kernel.h"
 
 #ifdef __x86_64__
 #include "idt64.h"
@@ -26,7 +27,19 @@ struct IDTDescriptor {
     uint16_t size;
     /** Pointer to the first entry of the IDT. */
     struct IDTEntry * ptr_table;
-};
+} __attribute__((packed));
+
+struct InterruptFrame {
+    /** Address where the interrupt occurred */
+    uint32_t instruction_pointer;
+    /** Code segment in GDT */
+    uint32_t  code_segment;
+    uint32_t  flags;
+    /** Current stack address */
+    uint32_t  stack_pointer;
+    /** Stack segment in GDT */
+    uint32_t  stack_segment;
+} __attribute__((packed));
 
 /**
  * Array representing the Interrupt Descriptor Table (IDT).
@@ -37,12 +50,16 @@ struct IDTDescriptor {
  */
 struct IDTEntry idt_entries[256];
 
-void default_exception_handler() {
-    debug("Default Exception Handler");
+void __attribute__((interrupt)) default_exception_handler(struct InterruptFrame* frame) {
+    panic("Default Exception Handler at %p\n", frame->instruction_pointer);
 }
 
-void default_interrupt_handler() {
-    debug("Default Exception Handler");
+void __attribute__((interrupt)) default_exception_handler_error_code(struct InterruptFrame* frame) {
+    panic("Default Exception Handler with error at %p\n", frame->instruction_pointer);
+}
+
+void __attribute__((interrupt)) default_interrupt_handler(struct InterruptFrame* frame) {
+    panic("Default Exception Handler at %p\n", frame->instruction_pointer);
 }
 
 void init_idt() {
@@ -51,17 +68,24 @@ void init_idt() {
 
     // Set exceptions handlers
     for (uint8_t i = 0; i < 32; i++) {
-        idt_set_entry(i, default_exception_handler, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
+        if (i == 8  || i == 10 || i == 11 || i == 12 ||
+            i == 13 || i == 14 || i == 17 || i == 21) {
+            // Exception takes an error code
+            idt_set_entry(idt_entries, i, default_exception_handler_error_code, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
+        } else {
+            idt_set_entry(idt_entries, i, default_exception_handler, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
+        }
     }
+
     // Set regular interrupts handlers
-    for (uint8_t i = 32; i <= 255; i++) {
-        idt_set_entry(i, default_interrupt_handler, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
+    for (uint16_t i = 32; i < 256; i++) {
+        idt_set_entry(idt_entries, i, default_interrupt_handler, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
     }
 
     struct IDTDescriptor descriptor;
-    descriptor.size = sizeof(idt_entries) - 1;
+    descriptor.size = sizeof(idt_entries);
     descriptor.ptr_table = idt_entries;
-
+    debug("Set IDT Description. Size=%d. Table=%p\n", descriptor.size, descriptor.ptr_table);
     __asm__ volatile("lidt %0" : : "m" (descriptor));
 
     set_interrupt_flag();

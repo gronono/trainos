@@ -2,6 +2,7 @@
 
 #include "../typedefs.h"
 #include "gdt.h"
+#include "../debug/debug.h"
 
 /**
  * Represents an entry in the Interrupt Descriptor Table (IDT) in 32-bits mode.
@@ -22,12 +23,11 @@ struct IDTEntry {
 // Gate Task is only available on x86 (32bits)
 #define IDT_GATE_TASK           0b00000101
 
-extern struct IDTEntry idt_entries[256];
-void idt_set_entry(uint8_t index, ptr_t handler, uint8_t flags) {
-    struct IDTEntry entry = idt_entries[index];
-    entry.isr_low = ((ptr_t) handler) & 0xFFFF;
-    entry.isr_high = ((ptr_t) handler) >> 16 & 0xFFFF;
-    entry.gdt_segment = GDT_KERNEL_CODE;
-    entry.flags = flags;
-    entry.reserved = 0;
+void idt_set_entry(struct IDTEntry* idt_entries, uint8_t index, void* handler, uint8_t flags) {
+    struct IDTEntry* entry = &idt_entries[index];
+    entry->isr_low = ((ptr_t) handler) & 0xFFFF;
+    entry->isr_high = ((ptr_t) handler) >> 16 & 0xFFFF;
+    entry->gdt_segment = GDT_KERNEL_CODE;
+    entry->flags = flags;
+    entry->reserved = 0;
 }

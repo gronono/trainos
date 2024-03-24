@@ -18,3 +18,7 @@ void debug(const char* format, ...) {
     print(write_com1, format, vargs);
     va_end(vargs);
 }
+
+void debug_vargs(const char* format, va_list vargs) {
+    print(write_com1, format, vargs);
+}

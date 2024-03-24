@@ -23,8 +23,7 @@ struct IDTEntry {
     uint32_t reserved2;
 } __attribute__((packed));
 
-extern struct IDTEntry idt_entries[256];
-void idt_set_entry(uint8_t index, void* handler, uint8_t flags) {
+void idt_set_entry(struct IDTEntry* idt_entries, uint8_t index, void* handler, uint8_t flags) {
     struct IDTEntry entry = idt_entries[index];
     entry.isr_low = ((ptr_t) handler) & 0xFFFF;
     entry.isr_middle = ((ptr_t) handler) >> 16 & 0xFFFF;

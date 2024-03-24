@@ -1,5 +1,9 @@
 #pragma once
 
+#include "../varargs.h"
+
+#define BREAKPOINT __asm__ volatile("xchgw %bx, %bx");
+
 /**
  * Initializes the debugging functionality.
  *
@@ -18,3 +22,5 @@ void debug_init();
  * @param ...    Additional variable arguments containing the data to be printed.
  */
 void debug(const char* format, ...);
+
+void debug_vargs(const char* format, va_list vargs);
