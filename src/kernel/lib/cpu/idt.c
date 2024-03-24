@@ -1,7 +1,8 @@
 #include "idt.h"
-#include "../debug/debug.h"
 #include "interrupt.h"
-#include "../../kernel.h"
+#include "idtdefs.h"
+#include "../debug/debug.h"
+#include "../kernel/kernel.h"
 
 #ifdef __x86_64__
 #include "idt64.h"
@@ -31,14 +32,14 @@ struct IDTDescriptor {
 
 struct InterruptFrame {
     /** Address where the interrupt occurred */
-    uint32_t instruction_pointer;
+    ptr_t instruction_pointer;
     /** Code segment in GDT */
-    uint32_t  code_segment;
-    uint32_t  flags;
+    ptr_t  code_segment;
+    ptr_t  flags;
     /** Current stack address */
-    uint32_t  stack_pointer;
+    ptr_t  stack_pointer;
     /** Stack segment in GDT */
-    uint32_t  stack_segment;
+    ptr_t  stack_segment;
 } __attribute__((packed));
 
 /**
@@ -50,16 +51,26 @@ struct InterruptFrame {
  */
 struct IDTEntry idt_entries[256];
 
-void __attribute__((interrupt)) default_exception_handler(struct InterruptFrame* frame) {
-    panic("Default Exception Handler at %p\n", frame->instruction_pointer);
+void handle(const char* message, struct InterruptFrame* frame, ptr_t error_code) {
+    debug("Interrupt frame:\n");
+    debug(" Code segment: 0x%x\n", frame->code_segment);
+    debug(" Instruction pointer: %p\n", frame->instruction_pointer);
+    debug(" Stack segment: 0x%x\n", frame->stack_segment);
+    debug(" Stack pointer: %p\n", frame->stack_pointer);
+    debug(" Error code: 0x%x\n", error_code);
+    panic(message);
 }
 
-void __attribute__((interrupt)) default_exception_handler_error_code(struct InterruptFrame* frame) {
-    panic("Default Exception Handler with error at %p\n", frame->instruction_pointer);
+void __attribute__((interrupt)) default_exception_handler(struct InterruptFrame* frame) {
+    handle("Unsupported Exception\n", frame, 0);
+}
+
+void __attribute__((interrupt)) default_exception_handler_error_code(struct InterruptFrame* frame, ptr_t error_code) {
+    handle("Unsupported Exception with code\n", frame, error_code);
 }
 
 void __attribute__((interrupt)) default_interrupt_handler(struct InterruptFrame* frame) {
-    panic("Default Exception Handler at %p\n", frame->instruction_pointer);
+    handle("Unsupported Interrupt\n", frame, 0);
 }
 
 void init_idt() {
@@ -68,12 +79,23 @@ void init_idt() {
 
     // Set exceptions handlers
     for (uint8_t i = 0; i < 32; i++) {
-        if (i == 8  || i == 10 || i == 11 || i == 12 ||
-            i == 13 || i == 14 || i == 17 || i == 21) {
-            // Exception takes an error code
-            idt_set_entry(idt_entries, i, default_exception_handler_error_code, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-        } else {
-            idt_set_entry(idt_entries, i, default_exception_handler, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
+        switch (i) {
+            case EXCEPTION_DOUBLE_FAULT:
+            case EXCEPTION_INVALID_TSS:
+            case EXCEPTION_SEGMENT_NOT_PRESENT:
+            case EXCEPTION_STACK_SEGMENT_FAULT:
+            case EXCEPTION_GENERAL_PROTECTION_FAULT:
+            case EXCEPTION_PAGE_FAULT:
+            case EXCEPTION_ALIGNMENT_CHECK:
+            case EXCEPTION_CONTROL_PROTECTION:
+            case EXCEPTION_VMM_COMMUNICATION:
+            case EXCEPTION_SECURITY:
+                // Exception takes an error code
+                idt_set_entry(idt_entries, i, default_exception_handler_error_code, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
+                break;
+            default:
+                idt_set_entry(idt_entries, i, default_exception_handler, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
+                break;
         }
     }
 
