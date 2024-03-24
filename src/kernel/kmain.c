@@ -1,13 +1,14 @@
 #include "lib/vga/vga_text.h"
 #include "lib/debug/debug.h"
 #include "lib/console/console.h"
-#include "lib/cpu//bios.h"
+#include "lib/cpu//idt.h"
 
 __attribute__((section(".kmain"))) void kmain() {
     debug_init();
     vga_text_init();
     console_init(vga_text_put_char);
     console_print("Starting kernel...\n");
+    init_idt();
 
 //    debug("Avant call_int_15_e820");
 //    BREAKPOINT
