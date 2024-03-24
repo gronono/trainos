@@ -1,5 +1,5 @@
 #include "vga_text.h"
-#include "../port/port.h"
+#include "../bios/bios.h"
 #include "../strings/strings.h"
 #include "../debug/debug.h"
 
