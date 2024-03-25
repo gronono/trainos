@@ -264,6 +264,7 @@ extern void isr254();
 extern void isr255();
 
 void* handlers[] = {
+        isr0,
         isr1,
         isr2,
         isr3,
