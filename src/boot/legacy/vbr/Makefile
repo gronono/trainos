@@ -15,14 +15,5 @@ OBJECTS_C=$(patsubst %.c, $(BUILD_DIR)/boot/legacy/%.o, $(SOURCES_C))
 .PHONY: build
 build: ${BUILD_DIR}/boot/legacy/vbr.bin
 
-# ${BUILD_DIR}/boot/legacy/vbr.bin: $(OBJECTS_C) $(BUILD_DIR)/boot/legacy/boot.o
-#	${GCC_COMPILER} -T linker.ld ${LINK_FLAGS} -Wl,-Map=$(BUILD_DIR)/boot/legacy/vbr.map -o $@ $^
-
-# $(BUILD_DIR)/boot/legacy/boot.o: boot.asm
-#	${NASM_COMPILER} -f ${EXE_FORMAT} boot.asm -o ${BUILD_DIR}/boot/legacy/boot.o -l ${BUILD_DIR}/boot/legacy/boot.lst -w+orphan-labels
-
-# $(BUILD_DIR)/boot/legacy/%.o: %.c
-#	${GCC_COMPILER} ${COMPILE_FLAGS} -o $@ $<
-
 ${BUILD_DIR}/boot/legacy/vbr.bin: vbr.asm
-	${NASM_COMPILER} -f bin vbr.asm -o ${BUILD_DIR}/boot/legacy/vbr.bin -l ${BUILD_DIR}/boot/legacy/vbr.lst -w+orphan-labels
+	${NASM_COMPILER} -f bin vbr.asm -o ${BUILD_DIR}/boot/legacy/vbr.bin -l ${BUILD_DIR}/boot/legacy/vbr.lst -w+orphan-labels -w+number-overflow

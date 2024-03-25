@@ -37,8 +37,14 @@ Before the VBR, the memory layout is:
 
 ## VBR
 
-First the VBR copy it self at 0x0500 and erase the MBR code.
+First the VBR copy it self at 0x0500 and erase the MBR code then load the kernel an jump to it.
 
-## Before Stage 2
+Just before to jump to the kernel, the memory is organized as :
 
-## Before Kernel
+
+| Offset  | Size   | Status   | Description                 |
+|---------|--------|----------|-----------------------------|
+| 0x00500 | 512    | usable   | VBR code                    |
+| 0x00700 | ksize  | usable   | Kernel                      |
+| 0x789FB | 772    | unusable | Memory Map (max=64 entries) |
+| 0x7BFFF | 16,384 | unusable | Stack (16K; Top at 0x7FFFF) |
