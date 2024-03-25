@@ -4,7 +4,6 @@
 
 void halt() {
     debug("!! System Halt !!\n");
-    __asm__ volatile ("hlt");
     clear_interrupt_flag();
     for (;;) {}
 }
