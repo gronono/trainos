@@ -2,7 +2,7 @@
 #include "lib/debug/debug.h"
 #include "lib/console/console.h"
 #include "lib/cpu/interrupt/idt.h"
-#include "lib/cpu/bios.h"
+#include "lib/kernel/kernel.h"
 
 __attribute__((section(".kmain"))) void kmain() {
     debug_init();
@@ -19,6 +19,6 @@ __attribute__((section(".kmain"))) void kmain() {
 //    debug("Apres call_int_15_e820");
 
     // Never returns from bootloader
-    debug("Kernel started\n");
-    for (;;) {}
+    console_print("Halt!\n");
+    halt();
 }

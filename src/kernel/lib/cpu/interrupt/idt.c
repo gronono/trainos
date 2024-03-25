@@ -1,7 +1,6 @@
 #include "idt.h"
 #include "interrupt.h"
 #include "_isr.h"
-#include "_irq.h"
 #include "../bios.h"
 #include "../../kernel/kernel.h"
 
@@ -94,7 +93,12 @@ struct IDTEntry idt_entries[IDT_ENTRIES_SIZE];
  */
 void isr_handler(struct InterruptFrame* frame){
     if (frame->idt_index < 32){
-        panic("!! Exception: %s !!\n", exception_messages[frame->idt_index]);
+        panic("!! Exception: %d (%s) - error: 0x%X !!\n",
+              frame->idt_index,
+              exception_messages[frame->idt_index],
+              frame->error_code);
+    } else {
+        panic("!! Unknown interrupt: %d !!\n", frame->idt_index);
     }
 }
 
@@ -141,61 +145,23 @@ void init_idt() {
     port_write(0xA1, 0x0);
 
     // Exception Handlers
-    idt_set_entry(idt_entries, 0, isr0, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 1, isr1, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 2, isr2, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 3, isr3, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 4, isr4, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 5, isr5, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 6, isr6, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 7, isr7, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 8, isr8, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 9, isr9, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 10, isr10, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 11, isr11, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 12, isr12, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 13, isr13, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 14, isr14, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 15, isr15, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 16, isr16, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 17, isr17, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 18, isr18, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 19, isr19, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 20, isr20, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 21, isr21, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 22, isr22, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 23, isr23, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 24, isr24, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 25, isr25, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 26, isr26, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 27, isr27, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 28, isr28, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 29, isr29, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 30, isr30, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-    idt_set_entry(idt_entries, 31, isr31, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-
+    for (uint8_t idt_index = 0; idt_index < 32; idt_index++) {
+        uint8_t flags = IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP;
+        idt_set_entry(idt_entries, idt_index, handlers[idt_index], flags);
+    }
     // IRQ Handlers
-    idt_set_entry(idt_entries, 32, irq0, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 33, irq1, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 34, irq2, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 35, irq3, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 36, irq4, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 37, irq5, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 38, irq6, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 39, irq7, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 40, irq8, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 41, irq9, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 42, irq10, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 43, irq11, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 44, irq12, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 45, irq13, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-    idt_set_entry(idt_entries, 46, irq14, IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT);
-
+    for (uint8_t idt_index = 32; idt_index < 48; idt_index++) {
+        uint8_t flags = IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT;
+        idt_set_entry(idt_entries, idt_index, handlers[idt_index], flags);
+    }
+    // Others handlers
+    for (uint16_t idt_index = 48; idt_index < IDT_ENTRIES_SIZE; idt_index++) {
+        uint8_t flags = IDT_PRESENT | IDT_RING_0 | IDT_GATE_INTERRUPT;
+        idt_set_entry(idt_entries, idt_index, handlers[idt_index], flags);
+    }
     // Syscall interrupts
     idt_set_entry(idt_entries, 128, isr128, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
     idt_set_entry(idt_entries, 177, isr177, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
-
-    // TODO Hardware interrupts (IRQ) idt_entries from 32 to 255
 
     struct IDTDescriptor descriptor;
     descriptor.size = sizeof(idt_entries);

@@ -67,7 +67,7 @@ kernel_dap:
     .size       db  0x10
     .reserved   db  0x00
     ; number of sectors to read (1 sector = 512 bytes)
-    .sectors    dw  0x000F  ;   max around 3FD
+    .sectors    dw  0x0012  ;   max around 3FD
     ; destination = 0x0000:0x7C00
     .offset     dw  0x0700
     .segment    dw  0x0000

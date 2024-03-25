@@ -2,6 +2,13 @@
 #include "../debug/debug.h"
 #include "../cpu/interrupt/interrupt.h"
 
+void halt() {
+    debug("!! System Halt !!\n");
+    __asm__ volatile ("hlt");
+    clear_interrupt_flag();
+    for (;;) {}
+}
+
 void panic(const char* format, ...) {
     debug("!! Kernel Panic !!\n");
 
@@ -10,8 +17,6 @@ void panic(const char* format, ...) {
     debug_vargs(format, vargs);
     va_end(vargs);
 
-    clear_interrupt_flag();
-
-    debug("!! System Halt !!");
-    for (;;) {}
+    halt();
 }
+
