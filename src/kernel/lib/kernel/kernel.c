@@ -1,6 +1,6 @@
 #include "kernel.h"
 #include "../debug/debug.h"
-#include "../cpu/interrupt/interrupt.h"
+#include "../cpu/interrupt.h"
 
 void halt() {
     debug("!! System Halt !!\n");

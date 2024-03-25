@@ -11,3 +11,5 @@ static inline uint8_t port_read(const uint16_t port) {
 static inline void port_write(const uint16_t port, const uint8_t value) {
     __asm__ volatile ("out %%al, %%dx" : : "a" (value), "d" (port));
 }
+
+extern void call_int_15_e820();

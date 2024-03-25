@@ -1,5 +1,5 @@
 #include "idt.h"
-#include "interrupt.h"
+#include "../interrupt.h"
 #include "_isr.h"
 #include "../bios.h"
 #include "../../kernel/kernel.h"

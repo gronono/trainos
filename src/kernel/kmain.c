@@ -1,8 +1,9 @@
-#include "lib/vga/vga_text.h"
 #include "lib/debug/debug.h"
 #include "lib/console/console.h"
-#include "lib/cpu/interrupt/idt.h"
+#include "lib/cpu/interrupt.h"
 #include "lib/kernel/kernel.h"
+#include "lib/vga/vga_text.h"
+#include "lib/cpu/bios.h"
 
 __attribute__((section(".kmain"))) void kmain() {
     debug_init();

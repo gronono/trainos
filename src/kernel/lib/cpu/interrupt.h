@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../typedefs.h"
-#include "../../debug/debug.h"
+#include "../typedefs.h"
+#include "../debug/debug.h"
+#include "idt/idt.h"
 
 /**
  * Set Interrupt Flag
