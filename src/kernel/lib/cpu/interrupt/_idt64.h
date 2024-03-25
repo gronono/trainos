@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../typedefs.h"
-#include "gdt.h"
+#include "../../typedefs.h"
+#include "../gdt.h"
 
 /**
  * Represents an entry in the Interrupt Descriptor Table (IDT) in 64-bit mode.
@@ -23,7 +23,7 @@ struct IDTEntry {
     uint32_t reserved2;
 } __attribute__((packed));
 
-void idt_set_entry(struct IDTEntry* idt_entries, uint8_t index, void* handler, uint8_t flags) {
+void idt_set_entry(struct IDTEntry* idt_entries, uint16_t index, void* handler, uint8_t flags) {
     struct IDTEntry entry = idt_entries[index];
     entry.isr_low = ((ptr_t) handler) & 0xFFFF;
     entry.isr_middle = ((ptr_t) handler) >> 16 & 0xFFFF;

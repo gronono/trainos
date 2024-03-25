@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../typedefs.h"
-#include "gdt.h"
-#include "../debug/debug.h"
+#include "../../typedefs.h"
+#include "../gdt.h"
+#include "../../debug/debug.h"
 
 /**
  * Represents an entry in the Interrupt Descriptor Table (IDT) in 32-bits mode.

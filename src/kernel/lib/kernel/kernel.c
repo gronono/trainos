@@ -1,9 +1,9 @@
 #include "kernel.h"
 #include "../debug/debug.h"
-#include "../cpu/interrupt.h"
+#include "../cpu/interrupt/interrupt.h"
 
 void panic(const char* format, ...) {
-    debug("Kernel Panic !!!!\n");
+    debug("!! Kernel Panic !!\n");
 
     va_list vargs;
     va_start(vargs, format);
@@ -11,5 +11,7 @@ void panic(const char* format, ...) {
     va_end(vargs);
 
     clear_interrupt_flag();
-    while (1);
+
+    debug("!! System Halt !!");
+    for (;;) {}
 }

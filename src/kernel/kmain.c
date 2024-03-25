@@ -1,7 +1,7 @@
 #include "lib/vga/vga_text.h"
 #include "lib/debug/debug.h"
 #include "lib/console/console.h"
-#include "lib/cpu//idt.h"
+#include "lib/cpu/interrupt/idt.h"
 #include "lib/cpu/bios.h"
 
 __attribute__((section(".kmain"))) void kmain() {
@@ -11,7 +11,7 @@ __attribute__((section(".kmain"))) void kmain() {
     console_print("Starting kernel...\n");
     init_idt();
     int a = 5, b = 0;
-    debug("a=%d\n", a / b);
+//    debug("a=%d\n", a / b);
 
 //    debug("Avant call_int_15_e820");
 //    BREAKPOINT

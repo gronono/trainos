@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../typedefs.h"
-#include "../debug/debug.h"
+#include "../../typedefs.h"
+#include "../../debug/debug.h"
 
 /**
  * Set Interrupt Flag
@@ -9,7 +9,6 @@
  */
 static inline void set_interrupt_flag() {
     debug("Set Interrupt Flag\n");
-    BREAKPOINT
     __asm__ volatile("sti");
 }
 
