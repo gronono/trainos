@@ -40,39 +40,39 @@ struct IDTDescriptor {
  */
 struct InterruptFrame {
     /** Control Register 2 value at the time of interrupt/exception. */
-    ptr_t cr2;
+    size_t page_fault_address;
     /** Data Segment value at the time of interrupt/exception. */
-    ptr_t ds;
-    /** EDI register value. */
-    ptr_t edi;
-    /** ESI register value. */
-    ptr_t esi;
-    /** EBP register value. */
-    ptr_t ebp;
-    /** ESP register value. */
-    ptr_t esp;
-    /** EBX register value. */
-    ptr_t ebx;
-    /** EDX register value. */
-    ptr_t edx;
-    /** ECX register value. */
-    ptr_t ecx;
-    /** EAX register value. */
-    ptr_t eax;
+    size_t data_segment;
+    /** RDI / EDI register value. */
+    size_t destination_register;
+    /** RSI / ESI register value. */
+    size_t source_register;
+    /** RBP / EBP register value. */
+    size_t stack_base_pointer;
+    /** RSP / ESP register value. */
+    size_t stack_pointer;
+    /** RBX / EBX register value. */
+    size_t base_register;
+    /** RDX / EDX register value. */
+    size_t data_register;
+    /** RCX / ECX register value. */
+    size_t counter_register;
+    /** RAX / EAX register value. */
+    size_t accumulator_register;
     /** Interrupt number or exception vector. */
-    ptr_t idt_index;
+    size_t idt_index;
     /** Error code (if applicable) for exceptions with error codes. */
-    ptr_t error_code;
+    size_t error_code;
     /** Instruction pointer at the time of interrupt/exception. */
-    ptr_t intruction_pointer;
+    size_t intruction_pointer;
     /** Code Segment value at the time of interrupt/exception. */
-    ptr_t code_segment;
+    size_t code_segment;
     /** EFLAGS register value. */
-    ptr_t eflags;
+    size_t eflags;
     /** User-mode stack pointer value (if in user-mode). */
-    ptr_t useresp;
+    size_t useresp;
     /** Stack Segment value at the time of interrupt/exception. */
-    ptr_t stack_segment;
+    size_t stack_segment;
 } __attribute__((packed));
 
 /**
@@ -116,7 +116,7 @@ void irq_handler(struct InterruptFrame* frame){
     handler = irq_routines[idt_index];
 
     if (handler) {
-        debug("IRQ %d: %p\n", idt_index, handler);
+        kprintf("IRQ %d: %p\n", idt_index, handler);
         handler(frame);
     }
 
@@ -129,7 +129,7 @@ void irq_handler(struct InterruptFrame* frame){
 }
 
 void init_idt() {
-    debug("Init IDT - addr: %p\n", idt_entries);
+    kprintf("Init IDT - addr: %p\n", idt_entries);
     clear_interrupt_flag();
 
     // TODO understand !!
@@ -168,7 +168,7 @@ void init_idt() {
     struct IDTDescriptor descriptor;
     descriptor.size = sizeof(idt_entries);
     descriptor.ptr_table = idt_entries;
-    debug("Set IDT Description. Size=%d. Table=%p\n", descriptor.size, descriptor.ptr_table);
+    kprintf("Set IDT Description. Size=%d. Table=%p\n", descriptor.size, descriptor.ptr_table);
     __asm__ volatile("lidt %0" : : "m" (descriptor));
 
     set_interrupt_flag();

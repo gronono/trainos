@@ -1,7 +1,6 @@
 #include "vga_text.h"
 #include "../cpu/bios.h"
-#include "../strings/strings.h"
-#include "../debug/debug.h"
+#include "../kernel/kernel.h"
 
 #define VGA_CTRL_PORT   0x3D4
 #define VGA_DATA_PORT   0x3D5
@@ -100,13 +99,6 @@ void vga_text_put_char(const char character) {
     update_position();
 }
 
-void vga_text_put_string(const char* format, ...) {
-    va_list vargs;
-    va_start(vargs, format);
-    print(vga_text_put_char, format, vargs);
-    va_end(vargs);
-}
-
 void vga_clear_screen() {
     for (int i = 0; i < NB_COLS * NB_ROWS; i++) {
         vga_text_put_char(' ');
@@ -114,8 +106,8 @@ void vga_clear_screen() {
     vga_text_set_position(0, 0);
 }
 
-void vga_text_init() {
-    debug("Init VGA - addr: %p\n", vga_text_memory);
+void vga_text_reset() {
+    kprintf("Init VGA - addr: %p\n", vga_text_memory);
     vga_text_set_colors(VGA_COLOR_LIGHT_GRAY, VGA_COLOR_BLACK);
     vga_text_set_position(0, 0);
     vga_clear_screen();

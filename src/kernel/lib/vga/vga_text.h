@@ -25,9 +25,9 @@ enum VGAColor {
 };
 
 /**
- * Initializes the VGA text display, setting up default colors, cursor position, and clearing the screen.
+ * Reset the VGA text display, setting up default colors, cursor position, and clearing the screen.
  */
-void vga_text_init();
+void vga_text_reset();
 
 /**
  * Clears the entire VGA text screen, filling it with spaces and resetting the cursor position to the top-left corner.
@@ -57,16 +57,3 @@ void vga_text_set_position(const uint8_t row, const uint8_t column);
  * @param character The character to be written.
  */
 void vga_text_put_char(const char character);
-
-/**
- * Writes a formatted string to the VGA text display at the current cursor position.
- *
- * This function supports the same format specifiers as the standard printf function.
- * The formatted string is written to the VGA text display starting at the current
- * cursor position. If the string exceeds the screen width, it wraps to the next line.
- *
- * @param format A pointer to a null-terminated format string.
- * @param ... Additional arguments to be formatted according to the format string.
- *             These are the same arguments used in the printf function.
- */
-void vga_text_put_string(const char* format, ...);

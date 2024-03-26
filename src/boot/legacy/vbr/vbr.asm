@@ -9,7 +9,7 @@ org 0x053E   ; Will moved to 0x500 so set origin to that + offset by FAT16 heade
 
 %include "../lib/symbols.asm"
 
-%define SMAP_ADDR   0x7B9FF
+%define MEMORY_MAP_ADDR   0x8000
 
 begin:
     %include "../lib/init.asm"
@@ -28,11 +28,11 @@ begin:
 after_read:
     ; Detect memory map before switching to protected mode
     ; because our address is high, we need to set DS
-    ; SMAP_ADDR = 0x7B9FF = 0x7000*10 + 0xB9FF = DS * 10 + SMAP_ADDR
-    mov ax, 0x7000
-    mov ds, ax
+    ; MEMORY_MAP_ADDR = 0x7B9FF = 0x7000*10 + 0xB9FF = DS * 10 + MEMORY_MAP_ADDR
+    ;mov ax, 0x7000
+    ;mov ds, ax
     %include "./memory_map.asm"
-    mov ds, bx      ; memory map completed so ebx=0
+    ;mov ds, bx      ; memory map completed so ebx=0
 
     ; Switch to protected mode
     %include "./switch_protected_mode.asm"
@@ -77,7 +77,7 @@ kernel_dap:
     .size       db  0x10
     .reserved   db  0x00
     ; number of sectors to read (1 sector = 512 bytes)
-    .sectors    dw  0x0013  ;   max around 3FD  FIXME Dynamic size
+    .sectors    dw  0x0014  ;   max around 3FD  FIXME Dynamic size
     ; destination = 0x0000:0x7C00
     .offset     dw  0x0700  ; TODO ? Move just behind VBR
     .segment    dw  0x0000

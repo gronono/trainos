@@ -38,15 +38,15 @@ typedef uint8_t             bool;
 #define false	            0
 
 #ifdef __x86_64__
-/** Defines the ptr_t type as uint64_t on 64-bit systems. */
-typedef uint64_t            ptr_t;
+/** Defines the size_t type as uint64_t on 64-bit systems. */
+typedef uint64_t            size_t;
 #else
-/** Defines the ptr_t type as uint32_t on 32-bit systems. */
-typedef uint32_t            ptr_t;
+/** Defines the size_t type as uint32_t on 32-bit systems. */
+typedef uint32_t            size_t;
 #endif
 
 /**
- * Custom type for status.
+ * Type for status.
  */
 typedef enum {
     /** Operation successful */

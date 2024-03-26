@@ -2,7 +2,6 @@
 
 #include "../../typedefs.h"
 #include "../gdt.h"
-#include "../../debug/debug.h"
 
 /**
  * Represents an entry in the Interrupt Descriptor Table (IDT) in 32-bits mode.
@@ -25,8 +24,8 @@ struct IDTEntry {
 
 void idt_set_entry(struct IDTEntry* idt_entries, uint8_t index, void* handler, uint8_t flags) {
     struct IDTEntry* entry = &idt_entries[index];
-    entry->isr_low = ((ptr_t) handler) & 0xFFFF;
-    entry->isr_high = ((ptr_t) handler) >> 16 & 0xFFFF;
+    entry->isr_low = ((size_t) handler) & 0xFFFF;
+    entry->isr_high = ((size_t) handler) >> 16 & 0xFFFF;
     entry->gdt_segment = GDT_KERNEL_CODE;
     entry->flags = flags;
     entry->reserved = 0;
