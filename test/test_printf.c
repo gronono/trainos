@@ -107,9 +107,15 @@ void handle_start(Params* params, char** ptr) {
 void handle_flags(Params* params, char** ptr) {
     switch (**ptr) {
         case '-':
+            params->flags |= FLAG_MINUS;
+            (*ptr)++;
+            break;
         case '\'':
+            params->flags |= FLAG_APOSTROPHE;
+            (*ptr)++;
+            break;
         case '#':
-            kprintf("<unsupported flags '%c'>", **ptr);
+            params->flags |= FLAG_HASH;
             (*ptr)++;
             break;
         case '+':
@@ -311,7 +317,7 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
     }
 
     uint8_t i = 0;
-    char buffer[20];
+    char buffer[25];
     do {
         buffer[i++] = digits[absolute_value % base];
         absolute_value /= base;
@@ -325,6 +331,12 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
         buffer[i++] = ' ';
     }
 
+    if (params->flags & FLAG_HASH &&
+            (params->type == TYPE_UNSIGNED_HEX || params->type == TYPE_POINTER)) {
+        buffer[i++] = 'x';
+        buffer[i++] = '0';
+    }
+
     while (i > 0) {
         char c = buffer[--i];
         if (c >= 'a' && c <= 'f' && params->extra & EXTRA_TYPE_UPPER) {
@@ -335,16 +347,9 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
 }
 
 void print_pointer(Params* params, va_list* vargs) {
-    uintptr_t value = va_arg(*vargs, uintptr_t);
-    uint8_t ptr_size = sizeof(uintptr_t);
-    uint8_t nb_digits = ptr_size * 2;
-
-    writec(params, '0');
-    writec(params, 'x');
-    for (int i = nb_digits - 1; i >= 0; i--) {
-        uint8_t hex_value = (value >> (i * 4)) & 0xF;
-        writec(params, digits[hex_value]);
-    }
+    params->length = LENGTH_LONG_LONG;
+    params->flags |= FLAG_HASH;
+    print_integer(params, vargs, 16, false);
 }
 
 void print_char(Params* params, va_list* vargs) {
@@ -488,6 +493,12 @@ int main(void) {
     printf("---\n");
     printf("%%x: %X\n", 0xABCD);
     kprintf("%%x: %X\n", 0xABCD);
+    printf("---\n");
+    printf("%%#x: %#x\n", 0xABCD);
+    kprintf("%%#x: %#x\n", 0xABCD);
+    printf("---\n");
+    printf("%%#x: %#X\n", 0xABCD);
+    kprintf("%%#x: %#X\n", 0xABCD);
     printf("---\n");
 
     // Pointeurs

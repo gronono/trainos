@@ -8,19 +8,13 @@
 /**
  * A basic implementation of the standard printf.
  *
- * Format: %[flags][.precision][length]type
+ * Format: %[flags][width][.precision][length]type
  *
- * Supported Flags :
- * - PLUS, SPACE, HASH
- *
- * Supported Precision:
- * - only with string
- *
- * Supported Length:
- * - hh, h, l, ll, z, j, t
- *
- * Supported Type:
- * - %, d, i, u, x, X, o, s, c, p, n
+ * Unsupported flags fields: -, 0, '
+ * Unsupported width field
+ * Unsupported precision field: with float / double (only string)
+ * Unsupported length field: L
+ * Unsupported type: f, F, e, E, g, G, a, A
  */
 void kprintf(const char* format, ...);
 
@@ -39,7 +33,7 @@ void kprintf(const char* format, ...);
 #define FLAG_SPACE           0b000100
 #define FLAG_ZERO            0b001000    // unsupported
 #define FLAG_APOSTROPHE      0b010000    // unsupported
-#define FLAG_HASH            0b100000    // unsupported
+#define FLAG_HASH            0b100000
 
 // LENGTH = 0 = undefined
 #define LENGTH_INT_CHAR      1
@@ -109,9 +103,15 @@ void handle_start(Params* params, char** ptr) {
 void handle_flags(Params* params, char** ptr) {
     switch (**ptr) {
         case '-':
+            params->flags |= FLAG_MINUS;
+            (*ptr)++;
+            break;
         case '\'':
+            params->flags |= FLAG_APOSTROPHE;
+            (*ptr)++;
+            break;
         case '#':
-            kprintf("<unsupported flags '%c'>", **ptr);
+            params->flags |= FLAG_HASH;
             (*ptr)++;
             break;
         case '+':
@@ -236,6 +236,8 @@ void handle_type(Params* params, char** ptr) {
         case 'n':
             params->type = TYPE_NOTHING;
             break;
+        case 'a':
+        case 'A':
         case 'f':
         case 'F':
         case 'e':
@@ -314,7 +316,7 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
     }
 
     uint8_t i = 0;
-    char buffer[20];
+    char buffer[25]; // in base 8, 3bits per digits = 22 char + one for the sign + two for '0x'
     do {
         buffer[i++] = digits[absolute_value % base];
         absolute_value /= base;
@@ -328,26 +330,25 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
         buffer[i++] = ' ';
     }
 
+    if (params->flags & FLAG_HASH &&
+        (params->type == TYPE_UNSIGNED_HEX || params->type == TYPE_POINTER)) {
+        buffer[i++] = 'x';
+        buffer[i++] = '0';
+    }
+
     while (i > 0) {
         char c = buffer[--i];
         if (c >= 'a' && c <= 'f' && params->extra & EXTRA_TYPE_UPPER) {
-            c -= 32;
+            c -= ' '; // 'a' - ' ' = 'A'
         }
         writec(params, c);
     }
 }
 
 void print_pointer(Params* params, va_list* vargs) {
-    uintptr_t value = va_arg(*vargs, uintptr_t);
-    uint8_t ptr_size = sizeof(uintptr_t);
-    uint8_t nb_digits = ptr_size * 2;
-
-    writec(params, '0');
-    writec(params, 'x');
-    for (int i = nb_digits - 1; i >= 0; i--) {
-        uint8_t hex_value = (value >> (i * 4)) & 0xF;
-        writec(params, digits[hex_value]);
-    }
+    params->length = LENGTH_LONG_LONG;
+    params->flags |= FLAG_HASH;
+    print_integer(params, vargs, 16, false);
 }
 
 void print_char(Params* params, va_list* vargs) {
