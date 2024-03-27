@@ -281,7 +281,7 @@ void print_pointer(Params* params, va_list* vargs) {
 
     writec(params, '0');
     writec(params, 'x');
-    for (int8_t i = nb_digits - 1; i >= 0; i--) {
+    for (int i = nb_digits - 1; i >= 0; i--) {
         uint8_t hex_value = (value >> (i * 4)) & 0xF;
         writec(params, digits[hex_value]);
     }
