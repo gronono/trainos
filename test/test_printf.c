@@ -282,6 +282,8 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
             value = (long long) va_arg(*vargs, size_t);
             break;
         case LENGTH_INT_MAX_T:
+            value = is_signed ? (long long) va_arg(*vargs, intmax_t) : (long long) va_arg(*vargs, uintmax_t);
+            break;
         case LENGTH_PTR_DIFF_T:
         case LENGTH_LONG_DOUBLE:
             kprintf("<unsupported length '%u'>", params->length);
@@ -521,8 +523,20 @@ int main(void) {
     size_t size = 1234567890;
     printf("%%zd: %zd\n", size);
     kprintf("%%zd: %zd\n", size);
+    printf("---\n");
 
     size_t sizea = -1234567890;
     printf("%%zd: %zd\n", sizea);
     kprintf("%%zd: %zd\n", sizea);
+    printf("---\n");
+
+    intmax_t signed_value = -123456789012345;
+    printf("Signed value: %jd\n", signed_value);
+    kprintf("Signed value: %jd\n", signed_value);
+    printf("---\n");
+
+    uintmax_t unsigned_value = 123456789012345;
+    printf("Unsigned value: %ju\n", unsigned_value);
+    kprintf("Unsigned value: %ju\n", unsigned_value);
+    printf("---\n");
 }

@@ -40,9 +40,13 @@ typedef uint8_t             bool;
 #if __WORDSIZE == 64
 typedef uint64_t            size_t;
 typedef uint64_t            uintptr_t;
+typedef uint64_t            uintmax_t;
+typedef int64_t             intmax_t;
 #else
 typedef uint32_t            size_t;
 typedef uint32_t            uintptr_t;
+typedef uint32_t            uintmax_t;
+typedef int32_t             intmax_t;
 #endif
 
 

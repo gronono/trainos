@@ -285,6 +285,8 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
             value = (long long) va_arg(*vargs, size_t);
             break;
         case LENGTH_INT_MAX_T:
+            value = is_signed ? (long long) va_arg(*vargs, intmax_t) : (long long) va_arg(*vargs, uintmax_t);
+            break;
         case LENGTH_PTR_DIFF_T:
             kprintf("<unsupported length '%u'>", params->length);
             return;
