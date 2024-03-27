@@ -3,6 +3,29 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <string.h>
+
+size_t string_length(const char* str) {
+    size_t len = 0;
+    while (*str != '\0') {
+        len++;
+        str++;
+    }
+    return len;
+}
+
+void string_reverse(char* str) {
+    size_t start = 0;
+    size_t end = string_length(str) - 1;
+
+    while (start < end) {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}
 
 void kprintf(const char* format, ...);
 
@@ -26,7 +49,7 @@ void kprintf(const char* format, ...);
 // Using a state machine
 #define STATE_START          0
 #define STATE_FLAGS          1
-#define STATE_WIDTH          2  // unsupported
+#define STATE_WIDTH          2
 #define STATE_PRECISION      3
 #define STATE_LENGTH         4
 #define STATE_TYPE           5
@@ -36,9 +59,9 @@ void kprintf(const char* format, ...);
 #define FLAG_MINUS           0b000001    // unsupported
 #define FLAG_PLUS            0b000010
 #define FLAG_SPACE           0b000100
-#define FLAG_ZERO            0b001000    // unsupported
+#define FLAG_ZERO            0b001000
 #define FLAG_APOSTROPHE      0b010000    // unsupported
-#define FLAG_HASH            0b100000    // unsupported
+#define FLAG_HASH            0b100000
 
 // LENGTH = 0 = undefined
 #define LENGTH_INT_CHAR      1
@@ -47,8 +70,8 @@ void kprintf(const char* format, ...);
 #define LENGTH_LONG_LONG     4
 #define LENGTH_LONG_DOUBLE   5   // unsupported
 #define LENGTH_SIZE_T        6
-#define LENGTH_INT_MAX_T     7   // unsupported
-#define LENGTH_PTR_DIFF_T    8   // unsupported
+#define LENGTH_INT_MAX_T     7
+#define LENGTH_PTR_DIFF_T    8
 
 // Types
 #define TYPE_PER_CENT        0
@@ -63,16 +86,16 @@ void kprintf(const char* format, ...);
 #define TYPE_CHAR            9
 #define TYPE_POINTER         10
 #define TYPE_DOUBLE_HEX      11  // unsupported
-#define TYPE_NOTHING         12  // unsupported
+#define TYPE_NOTHING         12
 
 #define EXTRA_TYPE_UPPER     0b001
-#define EXTRA_WIDTH_STAR     0b010   // unsupported
+#define EXTRA_WIDTH_STAR     0b010
 #define EXTRA_PRECISION_STAR 0b100
 
 typedef struct {
     uint8_t state;
     uint8_t flags;
-    uint8_t width;
+    int width;
     int precision;
     uint8_t length;
     uint8_t type;
@@ -92,6 +115,37 @@ void reset(Params * params) {
 void writec(Params* params, char c) {
     putchar(c);
     params->written++;
+}
+
+void pre_append(Params* params, char* str, va_list* vargs) {
+    if (params->flags & FLAG_MINUS) {
+        return;
+    }
+    uint8_t width = params->width;
+    if (params->extra & EXTRA_PRECISION_STAR) {
+        width = va_arg(*vargs, int);
+    }
+    char c = ' ';
+    bool numeric = params->type != TYPE_STRING && params->type != TYPE_CHAR;
+    if (numeric && params->flags & FLAG_ZERO) {
+        c = '0';
+    }
+
+    size_t size = string_length(str);
+    while (width > size) {
+        writec(params, c);
+        width--;
+    }
+}
+
+void writes(Params* params, char* str, va_list* vargs) {
+    pre_append(params, str, vargs);
+
+    for (size_t i = 0; *str != '\0'; i++, str++) {
+        if (params->precision == 0 || i < params->precision) {
+            writec(params, *str);
+        }
+    }
 }
 
 void handle_start(Params* params, char** ptr) {
@@ -162,7 +216,7 @@ void handle_precision(Params* params, char** ptr) {
         if (params->precision == 0) {
             params->extra |= EXTRA_PRECISION_STAR;
         } else {
-            kprintf("<invalid precision '%u*'", params->precision);
+            kprintf("<invalid precision '%u*'>", params->precision);
         }
         (*ptr)++;
     } else {
@@ -258,18 +312,12 @@ void handle_type(Params* params, char** ptr) {
 }
 
 void print_string(Params* params, va_list* vargs) {
-    int precision = params->precision;
-    if (params->extra & EXTRA_PRECISION_STAR) {
-        precision = va_arg(*vargs, int);
+    if (params->type == TYPE_STRING && params->extra & EXTRA_PRECISION_STAR) {
+        params->precision = va_arg(*vargs, int);
     }
 
     char* str = va_arg(*vargs, char*);
-    for (size_t i = 0; *str != '\0'; i++, str++) {
-        if (precision != 0 && i >= precision) {
-            break;
-        }
-        writec(params, *str);
-    }
+    writes(params, str, vargs);
 }
 
 char digits[] = "0123456789abcdef";
@@ -317,7 +365,7 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
     }
 
     uint8_t i = 0;
-    char buffer[25];
+    char buffer[25] = {0};
     do {
         buffer[i++] = digits[absolute_value % base];
         absolute_value /= base;
@@ -337,17 +385,22 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
         buffer[i++] = '0';
     }
 
-    while (i > 0) {
-        char c = buffer[--i];
+    for (uint8_t j = 0; j < sizeof(buffer); j++) {
+        char c = buffer[j];
         if (c >= 'a' && c <= 'f' && params->extra & EXTRA_TYPE_UPPER) {
-            c -= ' '; // convert to uppercase
+            buffer[j] = (char) (c - ' ');
         }
-        writec(params, c);
     }
+    string_reverse(buffer);
+    writes(params, buffer, vargs);
 }
 
 void print_pointer(Params* params, va_list* vargs) {
+#if __WORDSIZE == 64
     params->length = LENGTH_LONG_LONG;
+#else
+    params->length = LENGTH_LONG;
+#endif
     params->flags |= FLAG_HASH;
     print_integer(params, vargs, 16, false);
 }
@@ -361,7 +414,6 @@ void print_nothing(Params* params, va_list* vargs) {
     int* n_ptr = va_arg(*vargs, int*);
     *n_ptr = params->written;
 }
-
 
 void handle_print(Params* params, va_list* vargs) {
     switch (params->type) {
@@ -464,17 +516,17 @@ int main(void) {
     printf("%%d: %d\n", 12345);
     kprintf("%%d: %d\n", 12345);
     printf("---\n");
-    printf("%%d: %+d\n", 12);
-    kprintf("%%d: %+d\n", 12);
+    printf("%%+d: %+d\n", 12);
+    kprintf("%%+d: %+d\n", 12);
     printf("---\n");
-    printf("%%d: %+d\n", -12);
-    kprintf("%%d: %+d\n", -12);
+    printf("%%+d: %+d\n", -12);
+    kprintf("%%+d: %+d\n", -12);
     printf("---\n");
-    printf("%%d: % d\n", 12);
-    kprintf("%%d: % d\n", 12);
+    printf("%% d: % d\n", 12);
+    kprintf("%% d: % d\n", 12);
     printf("---\n");
-    printf("%%d: %4d\n", 1);
-    kprintf("%%d: %4d\n", 1);
+    printf("%%4d: %4d\n", 1);
+    kprintf("%%4d: %4d\n", 1);
     printf("---\n");
 
     // Entiers non signés
@@ -581,9 +633,17 @@ int main(void) {
 
     printf("precision - %%.7s: |%.7s|\n", "Hello, World!");
     kprintf("precision - %%.7s: |%.7s|\n", "Hello, World!");
-
     printf("---\n");
     printf("precision - %%.*s: |%.*s|\n", 7, "Hello, World!");
     kprintf("precision - %%.*s: |%.*s|\n", 7, "Hello, World!");
     printf("---\n");
+
+    printf("%%10s %10s\n", "hello");
+    kprintf("%%10s %10s\n", "hello");
+    printf("---\n");
+
+    printf("%%#05x %#04X\n", 0xaaa);
+    kprintf("%%#05x %#04x\n", 0xaaa);
+    printf("---\n");
 }
+
