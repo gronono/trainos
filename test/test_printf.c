@@ -259,10 +259,10 @@ void print_string(Params* params, va_list* vargs) {
 
     char* str = va_arg(*vargs, char*);
     for (size_t i = 0; *str != '\0'; i++, str++) {
-        writec(params, *str);
-        if (precision != 0 && i > precision) {
+        if (precision != 0 && i >= precision) {
             break;
         }
+        writec(params, *str);
     }
 }
 
@@ -558,12 +558,21 @@ int main(void) {
     ptrdiff_t ptr_diff = 100;
     printf("Pointer difference: %td\n", ptr_diff);
     kprintf("Pointer difference: %td\n", ptr_diff);
+    printf("---\n");
 
     int array[5] = {1, 2, 3, 4, 5};
     int *ptr1 = &array[0];  // Adresse de l'élément 1
     int *ptr3 = &array[2];  // Adresse de l'élément 3
-
     ptrdiff_t diff = ptr1 - ptr3;
     printf("Difference: %td\n", diff);
     kprintf("Difference: %td\n", diff);
+    printf("---\n");
+
+    printf("precision - %%.7s: |%.7s|\n", "Hello, World!");
+    kprintf("precision - %%.7s: |%.7s|\n", "Hello, World!");
+
+    printf("---\n");
+    printf("precision - %%.*s: |%.*s|\n", 7, "Hello, World!");
+    kprintf("precision - %%.*s: |%.*s|\n", 7, "Hello, World!");
+    printf("---\n");
 }

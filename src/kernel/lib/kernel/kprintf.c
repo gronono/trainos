@@ -17,10 +17,10 @@
  * - only with string
  *
  * Supported Length:
- * - hh, h, l, ll
+ * - hh, h, l, ll, z, j, t
  *
  * Supported Type:
- * - %, d, i, u, x, X, o, s, c, p
+ * - %, d, i, u, x, X, o, s, c, p, n
  */
 void kprintf(const char* format, ...);
 
@@ -64,7 +64,7 @@ void kprintf(const char* format, ...);
 #define TYPE_CHAR            9
 #define TYPE_POINTER         10
 #define TYPE_DOUBLE_HEX      11  // unsupported
-#define TYPE_NOTHING         12  // unsupported
+#define TYPE_NOTHING         12
 
 #define EXTRA_TYPE_UPPER     0b001
 #define EXTRA_WIDTH_STAR     0b010   // unsupported
@@ -261,10 +261,10 @@ void print_string(Params* params, va_list* vargs) {
 
     char* str = va_arg(*vargs, char*);
     for (size_t i = 0; *str != '\0'; i++, str++) {
-        writec(params, *str);
-        if (precision != 0 && i > precision) {
+        if (precision != 0 && i >= precision) {
             break;
         }
+        writec(params, *str);
     }
 }
 
