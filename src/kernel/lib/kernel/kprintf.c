@@ -48,8 +48,8 @@ void kprintf(const char* format, ...);
 #define LENGTH_LONG_LONG     4
 #define LENGTH_LONG_DOUBLE   5   // unsupported
 #define LENGTH_SIZE_T        6
-#define LENGTH_INT_MAX_T     7   // unsupported
-#define LENGTH_PTR_DIFF_T    8   // unsupported
+#define LENGTH_INT_MAX_T     7
+#define LENGTH_PTR_DIFF_T    8
 
 // Types
 #define TYPE_PER_CENT        0
@@ -283,11 +283,16 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
             break;
         case LENGTH_SIZE_T:
             value = (long long) va_arg(*vargs, size_t);
+            is_signed= false;
             break;
         case LENGTH_INT_MAX_T:
             value = is_signed ? (long long) va_arg(*vargs, intmax_t) : (long long) va_arg(*vargs, uintmax_t);
             break;
         case LENGTH_PTR_DIFF_T:
+            value = (long long) va_arg(*vargs, ptrdiff_t);
+            is_signed = true;
+            break;
+        case LENGTH_LONG_DOUBLE:
             kprintf("<unsupported length '%u'>", params->length);
             return;
         default:

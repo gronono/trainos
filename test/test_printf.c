@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <stddef.h>
 
 void kprintf(const char* format, ...);
 
@@ -285,6 +286,9 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
             value = is_signed ? (long long) va_arg(*vargs, intmax_t) : (long long) va_arg(*vargs, uintmax_t);
             break;
         case LENGTH_PTR_DIFF_T:
+            value = (long long) va_arg(*vargs, ptrdiff_t);
+            is_signed = true;
+            break;
         case LENGTH_LONG_DOUBLE:
             kprintf("<unsupported length '%u'>", params->length);
             return;
@@ -539,4 +543,16 @@ int main(void) {
     printf("Unsigned value: %ju\n", unsigned_value);
     kprintf("Unsigned value: %ju\n", unsigned_value);
     printf("---\n");
+
+    ptrdiff_t ptr_diff = 100;
+    printf("Pointer difference: %td\n", ptr_diff);
+    kprintf("Pointer difference: %td\n", ptr_diff);
+
+    int array[5] = {1, 2, 3, 4, 5};
+    int *ptr1 = &array[0];  // Adresse de l'élément 1
+    int *ptr3 = &array[2];  // Adresse de l'élément 3
+
+    ptrdiff_t diff = ptr1 - ptr3;
+    printf("Difference: %td\n", diff);
+    kprintf("Difference: %td\n", diff);
 }
