@@ -231,6 +231,9 @@ void handle_type(Params* params, char** ptr) {
         case 'p':
             params->type = TYPE_POINTER;
             break;
+        case 'n':
+            params->type = TYPE_NOTHING;
+            break;
         case 'f':
         case 'F':
         case 'e':
@@ -349,6 +352,12 @@ void print_char(Params* params, va_list* vargs) {
     writec(params, c);
 }
 
+void print_nothing(Params* params, va_list* vargs) {
+    int* n_ptr = va_arg(*vargs, int*);
+    *n_ptr = params->written;
+}
+
+
 void handle_print(Params* params, va_list* vargs) {
     switch (params->type) {
         case TYPE_PER_CENT:
@@ -376,6 +385,8 @@ void handle_print(Params* params, va_list* vargs) {
             print_pointer(params, vargs);
             break;
         case TYPE_NOTHING:
+            print_nothing(params, vargs);
+            break;
         case TYPE_DOUBLE_FIXED:
         case TYPE_DOUBLE_STD:
         case TYPE_DOUBLE_EXP:
