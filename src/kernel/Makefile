@@ -19,7 +19,7 @@ OBJECTS_C=$(patsubst %.c, $(BUILD_DIR)/kernel/%.o, $(SOURCES_C))
 build: ${BUILD_DIR}/kernel/kernel.bin
 
 ${BUILD_DIR}/kernel/kernel.bin: $(OBJECTS_ASM) $(OBJECTS_C)
-	${GCC_COMPILER} -T linker.ld ${LINK_FLAGS} -Wl,-Map=$(BUILD_DIR)/kernel/kernel.map -o $@ $^
+	${GCC_COMPILER} -T linker.ld ${LINK_FLAGS} -Wl,-Map=$(BUILD_DIR)/kernel/kernel.map -o $@ $^ -lgcc
 
 $(BUILD_DIR)/kernel/%.o: %.c
 	@mkdir -p $(@D)

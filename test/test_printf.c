@@ -233,31 +233,50 @@ void print_string(Params* params, va_list* vargs) {
 }
 
 char digits[] = "0123456789abcdef";
-void print_integer(Params* params, va_list* vargs, uint8_t base, bool sign) {
-//    switch (params->length) {
-//        case
-//    }
-//FIXME Length
-// handle proper type
-    unsigned int value = va_arg(*vargs, unsigned int);
+void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed) {
+    long long value;
+    switch (params->length) {
+        case LENGTH_INT_CHAR:
+            value = is_signed ? (long long) (char) va_arg(*vargs, int) : (long long) (unsigned char) va_arg(*vargs, unsigned int);
+            break;
+        case LENGTH_INT_SHORT:
+            value = is_signed ? (long long) (short) va_arg(*vargs, int) : (long long) (unsigned short) va_arg(*vargs, unsigned int);
+            break;
+        case LENGTH_LONG:
+            value = is_signed ? (long long) va_arg(*vargs, long) : (long long) va_arg(*vargs, unsigned long);
+            break;
+        case LENGTH_LONG_LONG:
+            value = is_signed ? va_arg(*vargs, long long) : (long long) va_arg(*vargs, unsigned long long);
+            break;
+        case LENGTH_LONG_DOUBLE:
+        case LENGTH_SIZE_T:
+        case LENGTH_INT_MAX_T:
+        case LENGTH_PTR_DIFF_T:
+            kprintf("<unsupported length '%u'>", params->length);
+            return;
+        default:
+            value = is_signed ? (long long) va_arg(*vargs, int) : (long long) va_arg(*vargs, unsigned int);
+            break;
+    }
 
-    size_t unsigned_value;
-    if (sign && value < 0) {
-        sign = true;
-        unsigned_value = -value;
+    bool negative;
+    unsigned long long absolute_value;
+    if (is_signed && value < 0) {
+        negative = true;
+        absolute_value = (unsigned long long) (-value);
     } else {
-        sign = false;
-        unsigned_value = value;
+        negative = false;
+        absolute_value = (unsigned long long) value;
     }
 
     uint8_t i = 0;
     char buffer[20];
     do {
-        buffer[i++] = digits[unsigned_value % base];
-        unsigned_value /= base;
-    } while (unsigned_value != 0);
+        buffer[i++] = digits[absolute_value % base];
+        absolute_value /= base;
+    } while (absolute_value != 0);
 
-    if (sign) {
+    if (negative == true) {
         buffer[i++] = '-';
     } else if (params->flags & FLAG_PLUS) {
         buffer[i++] = '+';
@@ -268,7 +287,7 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool sign) {
     while (i > 0) {
         char c = buffer[--i];
         if (c >= 'a' && c <= 'f' && params->extra & EXTRA_TYPE_UPPER) {
-            c -= 32;
+            c -= ' '; // convert to uppercase
         }
         writec(params, c);
     }
@@ -363,6 +382,15 @@ void kprintf(const char* format, ...) {
 
 
 int main(void) {
+    printf("sizeof(char): %lu\n", sizeof(char));
+    printf("sizeof(int): %lu\n", sizeof(int));
+    printf("sizeof(uint8_t): %lu\n", sizeof(uint8_t));
+    printf("sizeof(uint16_t): %lu\n", sizeof(uint16_t));
+    printf("sizeof(uint32_t): %lu\n", sizeof(uint32_t));
+    printf("sizeof(uint64_t): %lu\n", sizeof(uint64_t));
+    printf("sizeof(size_t): %lu\n", sizeof(size_t));
+    printf("sizeof(uintptr_t): %lu\n", sizeof(uintptr_t));
+
     printf("Hello\n");
     kprintf("Hello\n");
     printf("---\n");

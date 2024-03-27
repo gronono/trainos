@@ -1,5 +1,3 @@
-#pragma once
-
 #include "idt.h"
 #include "../interrupt.h"
 #include "_isr.h"
