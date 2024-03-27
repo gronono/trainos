@@ -21,6 +21,6 @@ BUILD_IMAGE_NAME    := ${OS_NAME}-toolchain:${OS_TARGET}
 GCC_COMPILER        := /opt/trainos/${OS_TARGET}/bin/${OS_TARGET}-gcc
 NASM_COMPILER       := /usr/bin/nasm
 
-BOCHS_EXE           :=/usr/bin/bochs
+BOCHS_EXE           := /usr/bin/bochs
 QEMU_EXE            := /usr/bin/qemu-system-i386
 GDB_EXE             := /usr/bin/gdb

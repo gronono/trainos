@@ -2,7 +2,7 @@
 ;
 memory_map:
     ; MEMORY_MAP_ADDR is the location of the map
-    mov edi, MEMORY_MAP_ADDR + 4    ; destination (+4 = size of uint32)
+    mov edi, MEMORY_MAP_ADDR + 4    ; destination (+4 = size of uint32 = size of entry count)
     xor ebx, ebx                    ; first entry
     xor ebp, ebp                    ; entry count
     mov edx, 'PAMS'                 ; signature SMAP
@@ -30,7 +30,7 @@ memory_map:
     jz .skip_entry
 
 .good_entry:
-    inc bp			                ; got a good entry: ++count, move to next storage spot
+    inc ebp			                ; got a good entry: ++count, move to next storage spot
     add di, 24
 
 .skip_entry:
@@ -44,4 +44,4 @@ memory_map:
     jmp $
 
 .done:
-    mov [MEMORY_MAP_ADDR], bp       ; store the entry count
+    mov [MEMORY_MAP_ADDR], ebp       ; store the entry count

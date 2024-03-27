@@ -1,9 +1,9 @@
-#include "kernel.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdarg.h>
 
-#include "../typedefs.h"
-#include "../uart/uart.h"
-#include "../varargs.h"
-#include "../vga/vga_text.h"
+void kprintf(const char* format, ...);
 
 /**
  * A basic implementation of the standard printf.
@@ -22,8 +22,6 @@
  * Supported Type:
  * - %, d, i, u, x, X, o, s, c, p
  */
-void kprintf(const char* format, ...);
-
 // Using a state machine
 #define STATE_START          0
 #define STATE_FLAGS          1
@@ -89,8 +87,7 @@ void reset(Params * params) {
 }
 
 void writec(Params* params, char c) {
-    uart_write(COM1, c);
-    vga_text_put_char(c);
+    putchar(c);
     params->written++;
 }
 
@@ -333,11 +330,11 @@ void handle_print(Params* params, va_list* vargs) {
 
 typedef void (*StateHandler_t)(Params*, char**);
 const StateHandler_t state_handlers[] = {
-    handle_start,
-    handle_flags,
-    handle_precision,
-    handle_length,
-    handle_type,
+        handle_start,
+        handle_flags,
+        handle_precision,
+        handle_length,
+        handle_type,
 };
 
 void kprintf(const char* format, ...) {
@@ -362,4 +359,101 @@ void kprintf(const char* format, ...) {
     }
 
     va_end(vargs);
+}
+
+
+int main(void) {
+    printf("Hello\n");
+    kprintf("Hello\n");
+    printf("---\n");
+
+    // Caractères simples
+    printf("%%c: %c\n", 'A');
+    kprintf("%%c: %c\n", 'A');
+    printf("---\n");
+
+    // Chaînes de caractères
+    printf("%%s: %s\n", "Hello, world!");
+    kprintf("%%s: %s\n", "Hello, world!");
+    printf("---\n");
+
+    // Entiers signés
+    printf("%%d: %d\n", 12345);
+    kprintf("%%d: %d\n", 12345);
+    printf("---\n");
+    printf("%%d: %+d\n", 12);
+    kprintf("%%d: %+d\n", 12);
+    printf("---\n");
+    printf("%%d: %+d\n", -12);
+    kprintf("%%d: %+d\n", -12);
+    printf("---\n");
+    printf("%%d: % d\n", 12);
+    kprintf("%%d: % d\n", 12);
+    printf("---\n");
+    printf("%%d: %4d\n", 1);
+    kprintf("%%d: %4d\n", 1);
+    printf("---\n");
+
+    // Entiers non signés
+    printf("%%u: %u\n", 54321);
+    kprintf("%%u: %u\n", 54321);
+    printf("---\n");
+
+    // Octal
+    printf("%%o: %o\n", 123);
+    kprintf("%%o: %o\n", 123);
+    printf("---\n");
+
+    // Hexadécimal
+    printf("%%x: %x\n", 0xABCD);
+    kprintf("%%x: %x\n", 0xABCD);
+    printf("---\n");
+    printf("%%x: %X\n", 0xABCD);
+    kprintf("%%x: %X\n", 0xABCD);
+    printf("---\n");
+
+    // Pointeurs
+    int var = 42;
+    printf("%%p: %p\n", (void*)&var);
+    kprintf("%%p: %p\n", (void*)&var);
+    printf("---\n");
+
+    // Caractères spéciaux
+    int a = 0;
+    int b = 0;
+    printf("%%n: %n\n", &a);
+    kprintf("%%n: %n\n", &b);
+    printf("res: %d\n", a);
+    kprintf("res: %d\n", b);
+    printf("---\n");
+
+    // Flottants
+    printf("%%f: %f\n", 3.14159);
+    kprintf("%%f: %f\n", 3.14159);
+    printf("---\n");
+
+    // Largeur minimale
+    printf("%5d\n", 10);
+    kprintf("%5d\n", 10);
+    printf("---\n");
+
+    // Précision des décimales
+    printf("%.2f\n", 3.14159);
+    kprintf("%.2f\n", 3.14159);
+    printf("---\n");
+
+    // Combiner largeur minimale et précision
+    printf("%10.4f\n", 123.456789);
+    kprintf("%10.4f\n", 123.456789);
+    printf("---\n");
+
+    printf("%u\n", 0x0005);
+    kprintf("%u\n", 0x0005);
+    printf("---\n");
+
+    uint16_t d = 8006;
+    uint16_t c = *(uint16_t*) &d;
+    printf("value: %u at %p\n", c, &d);
+    kprintf("value: %u at %p\n", c, &d);
+    printf("---\n");
 }

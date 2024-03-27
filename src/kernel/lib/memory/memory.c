@@ -14,7 +14,7 @@ typedef struct {
 
 void print_memory_map() {
     uint32_t nb = *(uint32_t*) MEMORY_MAP_ADDR;
-    MemoryMapEntry* entries = (MemoryMapEntry*) (MEMORY_MAP_ADDR + sizeof(uint16_t));
+    MemoryMapEntry* entries = (MemoryMapEntry*) (MEMORY_MAP_ADDR + sizeof(nb));
     kprintf("NB %u\n", nb);
     kprintf("ENTRIES %p\n", entries);
     kprintf("Memory Map: %u entries at %p\n", nb, entries);

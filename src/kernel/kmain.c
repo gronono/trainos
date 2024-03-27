@@ -6,7 +6,6 @@
 __attribute__((section(".kmain"))) void kmain() {
     vga_text_reset();
     kernel_init();
-    set_putc(vga_text_put_char);
     init_idt();
 
     print_memory_map();
