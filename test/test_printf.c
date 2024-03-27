@@ -25,7 +25,7 @@ void kprintf(const char* format, ...);
 // Using a state machine
 #define STATE_START          0
 #define STATE_FLAGS          1
-#define STATE_WIDTH          2
+#define STATE_WIDTH          2  // unsupported
 #define STATE_PRECISION      3
 #define STATE_LENGTH         4
 #define STATE_TYPE           5
@@ -45,7 +45,7 @@ void kprintf(const char* format, ...);
 #define LENGTH_LONG          3
 #define LENGTH_LONG_LONG     4
 #define LENGTH_LONG_DOUBLE   5   // unsupported
-#define LENGTH_SIZE_T        6   // unsupported
+#define LENGTH_SIZE_T        6
 #define LENGTH_INT_MAX_T     7   // unsupported
 #define LENGTH_PTR_DIFF_T    8   // unsupported
 
@@ -71,6 +71,7 @@ void kprintf(const char* format, ...);
 typedef struct {
     uint8_t state;
     uint8_t flags;
+    uint8_t width;
     int precision;
     uint8_t length;
     uint8_t type;
@@ -80,6 +81,7 @@ typedef struct {
 
 void reset(Params * params) {
     params->flags = 0;
+    params->width = 0;
     params->precision = 0;
     params->length = 0;
     params->type = 0;
@@ -106,7 +108,7 @@ void handle_flags(Params* params, char** ptr) {
         case '-':
         case '\'':
         case '#':
-            kprintf("<unsupported flags '%c'", **ptr);
+            kprintf("<unsupported flags '%c'>", **ptr);
             (*ptr)++;
             break;
         case '+':
@@ -123,6 +125,25 @@ void handle_flags(Params* params, char** ptr) {
             break;
         default:
             params->state = STATE_WIDTH;
+    }
+}
+
+void handle_width(Params* params, char** ptr) {
+    if (**ptr >= '0' && **ptr <= '9') {
+        params->width = params->width * 10 + (**ptr - '0');
+        (*ptr)++;
+    } else if (**ptr == '*') {
+        if (params->width == 0) {
+            params->extra |= EXTRA_WIDTH_STAR;
+        } else {
+            kprintf("<invalid width '%u*'>", params->width);
+        }
+        (*ptr)++;
+    } else if (**ptr == '.') {
+        params->state = STATE_PRECISION;
+        (*ptr)++;
+    } else {
+        params->state = STATE_LENGTH;
     }
 }
 
@@ -160,11 +181,20 @@ void handle_length(Params* params, char** ptr) {
             }
             (*ptr)++;
             break;
-        case 'L':
         case 'z':
+            params->length = LENGTH_SIZE_T;
+            (*ptr)++;
+            break;
+        case 'L':
+            params->length = LENGTH_LONG_DOUBLE;
+            (*ptr)++;
+            break;
         case 'j':
+            params->length = LENGTH_INT_MAX_T;
+            (*ptr)++;
+            break;
         case 't':
-            kprintf("<unsupported length '%c'", **ptr);
+            params->length = LENGTH_PTR_DIFF_T;
             (*ptr)++;
             break;
         default:
@@ -207,7 +237,7 @@ void handle_type(Params* params, char** ptr) {
         case 'g':
         case 'G':
         default:
-            kprintf("<unsupported type '%c'", **ptr);
+            kprintf("<unsupported type '%c'>", **ptr);
             break;
     }
     params->state = STATE_PRINT;
@@ -248,10 +278,12 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
         case LENGTH_LONG_LONG:
             value = is_signed ? va_arg(*vargs, long long) : (long long) va_arg(*vargs, unsigned long long);
             break;
-        case LENGTH_LONG_DOUBLE:
         case LENGTH_SIZE_T:
+            value = (long long) va_arg(*vargs, size_t);
+            break;
         case LENGTH_INT_MAX_T:
         case LENGTH_PTR_DIFF_T:
+        case LENGTH_LONG_DOUBLE:
             kprintf("<unsupported length '%u'>", params->length);
             return;
         default:
@@ -351,6 +383,7 @@ typedef void (*StateHandler_t)(Params*, char**);
 const StateHandler_t state_handlers[] = {
         handle_start,
         handle_flags,
+        handle_width,
         handle_precision,
         handle_length,
         handle_type,
@@ -484,4 +517,12 @@ int main(void) {
     printf("value: %u at %p\n", c, &d);
     kprintf("value: %u at %p\n", c, &d);
     printf("---\n");
+
+    size_t size = 1234567890;
+    printf("%%zd: %zd\n", size);
+    kprintf("%%zd: %zd\n", size);
+
+    size_t sizea = -1234567890;
+    printf("%%zd: %zd\n", sizea);
+    kprintf("%%zd: %zd\n", sizea);
 }
