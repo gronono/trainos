@@ -1,5 +1,7 @@
 ; use the INT 0x15, eax= 0xE820 BIOS function to get a memory map
 ;
+%define E820_ENTRY_SIZE 20
+
 memory_map:
     ; MEMORY_MAP_ADDR is the location of the map
     mov edi, MEMORY_MAP_ADDR + 4    ; destination (+4 = size of uint32 = size of entry count)
@@ -8,7 +10,7 @@ memory_map:
     mov edx, 'PAMS'                 ; signature SMAP
     mov eax, 0xE820                 ; function E820
     mov [es:di + 20], dword 1       ; force a valid ACPI 3.X entry
-    mov ecx, 24		                ; ask for 24 bytes
+    mov ecx, E820_ENTRY_SIZE        ; ask for 24 bytes
     int 0x15                        ; call
     jc .failed                      ; carry set on first call means "unsupported function"
     cmp edx, 'PAMS'     	        ; on success, eax must have been reset to "SMAP"
@@ -19,7 +21,7 @@ memory_map:
 
 .next_entry:
     mov edx, 'PAMS'     	        ; restore signature
-    mov ecx, 24		                ; ask for 24 bytes
+    mov ecx, E820_ENTRY_SIZE        ; ask for 24 bytes
     mov eax, 0xE820                 ; reset function E820
     int 0x15                        ; call next entry
 
@@ -31,7 +33,7 @@ memory_map:
 
 .good_entry:
     inc ebp			                ; got a good entry: ++count, move to next storage spot
-    add di, 24
+    add di, E820_ENTRY_SIZE
 
 .skip_entry:
     test ebx, ebx		            ; if ebx resets to 0, list is complete
