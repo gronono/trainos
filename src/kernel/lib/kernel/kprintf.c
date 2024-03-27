@@ -229,7 +229,7 @@ void print_string(Params* params, va_list* vargs) {
     char* str = va_arg(*vargs, char*);
     for (size_t i = 0; *str != '\0'; i++, str++) {
         writec(params, *str);
-        if (i > precision) {
+        if (precision != 0 && i > precision) {
             break;
         }
     }
