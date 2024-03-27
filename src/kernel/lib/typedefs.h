@@ -37,13 +37,14 @@ typedef uint8_t             bool;
 /** Macro representing the boolean value false. */
 #define false	            0
 
-#ifdef __x86_64__
-/** Defines the size_t type as uint64_t on 64-bit systems. */
+#if __WORDSIZE == 64
 typedef uint64_t            size_t;
+typedef uint64_t            uintptr_t;
 #else
-/** Defines the size_t type as uint32_t on 32-bit systems. */
 typedef uint32_t            size_t;
+typedef uint32_t            uintptr_t;
 #endif
+
 
 /**
  * Type for status.

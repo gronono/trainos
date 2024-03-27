@@ -77,7 +77,7 @@ kernel_dap:
     .size       db  0x10
     .reserved   db  0x00
     ; number of sectors to read (1 sector = 512 bytes)
-    .sectors    dw  0x0014  ;   max around 3FD  FIXME Dynamic size
+    .sectors    dw  0x0015  ;   max around 3FD  FIXME Dynamic size
     ; destination = 0x0000:0x7C00
     .offset     dw  0x0700  ; TODO ? Move just behind VBR
     .segment    dw  0x0000

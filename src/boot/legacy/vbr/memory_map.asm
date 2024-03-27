@@ -2,7 +2,7 @@
 ;
 memory_map:
     ; MEMORY_MAP_ADDR is the location of the map
-    mov edi, MEMORY_MAP_ADDR + 4    ; destination
+    mov edi, MEMORY_MAP_ADDR + 4    ; destination (+4 = size of uint32)
     xor ebx, ebx                    ; first entry
     xor ebp, ebp                    ; entry count
     mov edx, 'PAMS'                 ; signature SMAP

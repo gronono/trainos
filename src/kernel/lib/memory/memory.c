@@ -14,10 +14,12 @@ typedef struct {
 
 void print_memory_map() {
     uint32_t nb = *(uint32_t*) MEMORY_MAP_ADDR;
-    MemoryMapEntry* entries = (MemoryMapEntry*) (MEMORY_MAP_ADDR+4);
-    kprintf("Memory Map: %d at %p\n", nb, &entries);
-    for (uint32_t i = 0; i < nb; i++) {
-        MemoryMapEntry entry = entries[i];
-        kprintf("#%u at #%p: %p, %p\n", i, entry.start_address, entry.length, entry.type);
-    }
+    MemoryMapEntry* entries = (MemoryMapEntry*) (MEMORY_MAP_ADDR + sizeof(uint16_t));
+    kprintf("NB %u\n", nb);
+    kprintf("ENTRIES %p\n", entries);
+    kprintf("Memory Map: %u entries at %p\n", nb, entries);
+//    for (uint32_t i = 0; i < nb; i++) {
+//        MemoryMapEntry entry = entries[i];
+//        kprintf("#%u at #%p: %p, %p\n", i, entry.start_address, entry.length, entry.type);
+//    }
 }
