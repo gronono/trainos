@@ -1,7 +1,7 @@
-#include "lib/cpu/interrupt.h"
-#include "lib/kernel/kernel.h"
-#include "lib/vga/vga_text.h"
-#include "lib/memory/memory.h"
+#include "kernel/kernel.h"
+#include "memory/memory.h"
+#include "hardware/interrupt.h"
+#include "hardware/vga/vga_text.h"
 
 __attribute__((section(".kmain"))) void kmain() {
     vga_text_reset();

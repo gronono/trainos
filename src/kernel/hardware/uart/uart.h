@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../typedefs.h"
+#include "../../typedefs.h"
 
 /**
  * The base I/O port address for UART communication on COM1.

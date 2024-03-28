@@ -1,9 +1,8 @@
 #include "kernel.h"
 
 #include "../typedefs.h"
-#include "../uart/uart.h"
-#include "../varargs.h"
-#include "../vga/vga_text.h"
+#include "../hardware/uart/uart.h"
+#include "../hardware/vga/vga_text.h"
 #include "../string/string.h"
 
 /**

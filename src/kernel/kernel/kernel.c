@@ -1,6 +1,6 @@
 #include "kernel.h"
-#include "../cpu/interrupt.h"
-#include "../uart/uart.h"
+#include "../hardware/interrupt.h"
+#include "../hardware/uart/uart.h"
 
 void kernel_init() {
     uart_init(COM1);
