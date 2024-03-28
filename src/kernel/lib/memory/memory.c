@@ -5,20 +5,28 @@
 
 #define MEMORY_MAP_ADDR 0x8000
 
-struct MemoryMapEntry {
+typedef struct {
     uint64_t start_address;
     uint64_t length;
     uint32_t type;
-} __attribute__ ((packed));
+} __attribute__ ((packed)) MemoryMapEntry;
+
+typedef struct {
+    uint32_t size;
+    MemoryMapEntry entries[];
+} __attribute__ ((packed)) MemoryMap;
 
 void print_memory_map() {
-    uint32_t nb = *(uint32_t *) MEMORY_MAP_ADDR;
-    struct MemoryMapEntry *entries = (struct MemoryMapEntry *) (MEMORY_MAP_ADDR + sizeof(uint32_t));
-    kprintf("Memory Map: %u entries at %p - size %u\n", nb, entries, sizeof(struct MemoryMapEntry));
+    MemoryMap* map = (MemoryMap*) MEMORY_MAP_ADDR;
+    kprintf("Memory Map from %p : %u entries\n", MEMORY_MAP_ADDR, map->size);
     kprintf("#   Start Address       Length              Type\n");
-    for (uint32_t i = 0; i < nb; i++) {
-        struct MemoryMapEntry entry = entries[i];
-        kprintf("#%u  0x%016llx  0x%016llx  %u\n", i, entry.start_address, entry.length, entry.type);
+    for (uint32_t i = 0; i < map->size; i++) {
+        MemoryMapEntry* entry = &(map->entries[i]);
+        kprintf("#%u %p 0x%016llx  0x%016llx  %u\n", i,
+                entry,
+                entry->start_address,
+                entry->length,
+                entry->type);
     }
 }
 // QEMU
