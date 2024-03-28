@@ -24,8 +24,8 @@ struct IDTEntry {
 
 void idt_set_entry(struct IDTEntry* idt_entries, uint8_t index, void* handler, uint8_t flags) {
     struct IDTEntry* entry = &idt_entries[index];
-    entry->isr_low = ((size_t) handler) & 0xFFFF;
-    entry->isr_high = ((size_t) handler) >> 16 & 0xFFFF;
+    entry->isr_low = ((uintptr_t) handler) & 0xFFFF;
+    entry->isr_high = ((uintptr_t) handler) >> 16 & 0xFFFF;
     entry->gdt_segment = GDT_KERNEL_CODE;
     entry->flags = flags;
     entry->reserved = 0;

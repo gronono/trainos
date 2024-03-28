@@ -37,7 +37,7 @@ typedef uint8_t             bool;
 /** Macro representing the boolean value false. */
 #define false	            0
 
-#if __WORDSIZE == 64
+#if __x86_64__
 typedef uint64_t            size_t;
 typedef uint64_t            uintptr_t;
 typedef uint64_t            uintmax_t;

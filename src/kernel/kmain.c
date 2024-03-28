@@ -9,6 +9,10 @@ __attribute__((section(".kmain"))) void kmain() {
     init_idt();
 
     print_memory_map();
+    int a = 0;
+    // FIXME IDT is broken
+    // !! Exception: 524167 (��) - error: 0x1EBD !!
+    kprintf("%u", 5 / a);
 
     // Never returns from bootloader
     halt();
