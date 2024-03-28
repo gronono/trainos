@@ -11,8 +11,8 @@
  *
  * Format: %[flags][width][.precision][length]type
  *
- * Unsupported flags fields: -, 0, '
- * Unsupported width field
+ * Unsupported flags fields: -, '
+ * Unsupported width feature: padding right
  * Unsupported precision field: with float / double (only string)
  * Unsupported length field: L
  * Unsupported type: f, F, e, E, g, G, a, A
@@ -47,7 +47,7 @@ void kprintf(const char* format, ...);
 #define LENGTH_PTR_DIFF_T    8
 
 // Types
-#define TYPE_PER_CENT        0
+#define TYPE_PERCENT         0
 #define TYPE_SIGNED_INT      1
 #define TYPE_UNSIGNED_INT    2
 #define TYPE_DOUBLE_FIXED    3   // unsupported
@@ -240,7 +240,7 @@ void handle_length(Params* params, char** ptr) {
 void handle_type(Params* params, char** ptr) {
     switch (**ptr) {
         case '%':
-            params->type = TYPE_PER_CENT;
+            params->type = TYPE_PERCENT;
             break;
         case 'd':
         case 'i':
@@ -362,10 +362,12 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
         buffer[i++] = '0';
     }
 
-    for (uint8_t j = 0; j < sizeof(buffer); j++) {
-        char c = buffer[j];
-        if (c >= 'a' && c <= 'f' && params->extra & EXTRA_TYPE_UPPER) {
-            buffer[j] = (char) (c - ' ');
+    if (params->extra & EXTRA_TYPE_UPPER) {
+        for (uint8_t j = 0; j < sizeof(buffer); j++) {
+            char c = buffer[j];
+            if (c >= 'a' && c <= 'f') {
+                buffer[j] = (char) (c - ' ');
+            }
         }
     }
     string_reverse(buffer);
@@ -394,7 +396,7 @@ void print_nothing(Params* params, va_list* vargs) {
 
 void handle_print(Params* params, va_list* vargs) {
     switch (params->type) {
-        case TYPE_PER_CENT:
+        case TYPE_PERCENT:
             writec(params, '%');
             break;
         case TYPE_CHAR:
