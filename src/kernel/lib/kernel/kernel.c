@@ -1,7 +1,6 @@
 #include "kernel.h"
 #include "../cpu/interrupt.h"
 #include "../uart/uart.h"
-#include "../varargs.h"
 
 void kernel_init() {
     uart_init(COM1);
@@ -27,7 +26,7 @@ void panic(const char* format, ...) {
 
     va_list vargs;
     va_start(vargs, format);
-    kprintf(format, vargs);
+    kprintf_vargs(format, vargs);
     va_end(vargs);
 
     halt();

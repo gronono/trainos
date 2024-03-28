@@ -442,16 +442,13 @@ const StateHandler_t state_handlers[] = {
     handle_type,
 };
 
-void kprintf(const char* format, ...) {
+void kprintf_vargs(const char* format, va_list vargs) {
     if (format == NULL) {
         return;
     }
 
     Params params = {0};
     params.state = STATE_START;
-
-    va_list vargs;
-    va_start(vargs, format);
 
     char* ptr = (char*) format;
     while (*ptr != '\0') {
@@ -462,6 +459,11 @@ void kprintf(const char* format, ...) {
             handle_print(&params, &vargs);
         }
     }
+}
 
+void kprintf(const char* format, ...) {
+    va_list vargs;
+    va_start(vargs, format);
+    kprintf_vargs(format, vargs);
     va_end(vargs);
 }
