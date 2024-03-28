@@ -6,7 +6,7 @@
 /**
  * Represents an entry in the Interrupt Descriptor Table (IDT) in 64-bit mode.
  */
-typedef struct {
+struct IDTEntry {
     /** Lower 16 bits of the Interrupt Service Routine (ISR) address. */
     uint16_t isr_low;
     /** GDT segment selector for the ISR. */
@@ -21,10 +21,10 @@ typedef struct {
     uint32_t isr_high;
     /** Reserved field, should be set to zero. */
     uint32_t reserved2;
-} __attribute__((packed)) IDTEntry ;
+} __attribute__((packed));
 
-void idt_set_entry(IDTEntry* idt_entries, uint16_t index, void* handler, uint8_t flags) {
-    IDTEntry entry = idt_entries[index];
+void idt_set_entry(struct IDTEntry* idt_entries, uint16_t index, void* handler, uint8_t flags) {
+    struct IDTEntry entry = idt_entries[index];
     entry.isr_low = ((size_t) handler) & 0xFFFF;
     entry.isr_middle = ((size_t) handler) >> 16 & 0xFFFF;
     entry.isr_high = ((size_t) handler) >> 32 & 0xFFFF;

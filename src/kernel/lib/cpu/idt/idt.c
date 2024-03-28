@@ -26,17 +26,17 @@
  * This structure is used to define the layout of the IDT Descriptor,
  * which is used to load the Interrupt Descriptor Table (IDT) into memory.
  */
-typedef struct {
+struct IDTDescriptor {
     /** The size of the IDT (total number of entries) - 1. */
     uint16_t size;
     /** Pointer to the first entry of the IDT. */
-    IDTEntry * ptr_table;
-} __attribute__((packed)) IDTDescriptor;
+    struct IDTEntry * ptr_table;
+} __attribute__((packed));
 
 /**
  * Represents the context of a CPU when an interrupt or exception occurs.
  */
-typedef struct {
+struct InterruptFrame {
     /** Control Register 2 value at the time of interrupt/exception. */
     size_t page_fault_address;
     /** Data Segment value at the time of interrupt/exception. */
@@ -71,7 +71,7 @@ typedef struct {
     size_t useresp;
     /** Stack Segment value at the time of interrupt/exception. */
     size_t stack_segment;
-} __attribute__((packed)) InterruptFrame;
+} __attribute__((packed));
 
 /**
  * Array representing the Interrupt Descriptor Table (IDT).
@@ -80,7 +80,7 @@ typedef struct {
  * The IDT is used for managing interrupt handlers and their respective entry points.
  * The number of entries is 256 (0-255) for all possible interrupt vectors.
  */
-IDTEntry idt_entries[IDT_ENTRIES_SIZE];
+struct IDTEntry idt_entries[IDT_ENTRIES_SIZE];
 
 /**
  * Handler function for Interrupt Service Routines (ISR).
@@ -91,7 +91,7 @@ IDTEntry idt_entries[IDT_ENTRIES_SIZE];
  *
  * @param frame Pointer to the InterruptFrame containing CPU context at the time of interrupt.
  */
-void isr_handler(InterruptFrame* frame){
+void isr_handler(struct InterruptFrame* frame){
     if (frame->idt_index < 32){
         panic("!! Exception: %d (%s) - error: 0x%X !!\n",
               frame->idt_index,
@@ -107,8 +107,8 @@ void *irq_routines[] = {
         0,0,0,0,0,0,0,0
 };
 
-void irq_handler(InterruptFrame* frame){
-    void (*handler)(InterruptFrame *frame);
+void irq_handler(struct InterruptFrame* frame){
+    void (*handler)(struct InterruptFrame *frame);
 
     uint16_t idt_index = frame->idt_index - 32;
     handler = irq_routines[idt_index];
@@ -163,7 +163,7 @@ void init_idt() {
     idt_set_entry(idt_entries, 128, isr128, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
     idt_set_entry(idt_entries, 177, isr177, IDT_PRESENT | IDT_RING_0 | IDT_GATE_TRAP);
 
-    IDTDescriptor descriptor;
+    struct IDTDescriptor descriptor;
     descriptor.size = sizeof(idt_entries);
     descriptor.ptr_table = idt_entries;
     kprintf("Set IDT Description. Size=%d. Table=%p\n", descriptor.size, descriptor.ptr_table);
