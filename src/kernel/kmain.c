@@ -9,9 +9,9 @@ __attribute__((section(".kmain"))) void kmain() {
     init_idt();
 
     print_memory_map();
-//    int a = 0;
-//    kprintf("%u", 5 / a);
+    int a = 0;
+    kprintf("%u", 5 / a);
 
     // Never returns from bootloader
-    halt();
+    kernel_halt();
 }

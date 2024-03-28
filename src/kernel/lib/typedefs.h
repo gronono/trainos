@@ -32,9 +32,9 @@ typedef long long           int64_t;
  * and any non-zero value represents true.
  */
 typedef uint8_t             bool;
-/** Macro representing the boolean value true. */
+/** The boolean value true. */
 #define true	            1
-/** Macro representing the boolean value false. */
+/** The boolean value false. */
 #define false	            0
 
 #if __x86_64__

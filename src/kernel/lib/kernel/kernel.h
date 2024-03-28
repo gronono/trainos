@@ -7,5 +7,5 @@ void kernel_init();
 
 void kprintf(const char* format, ...);
 void kprintf_vargs(const char* format, va_list vargs);
-void panic(const char* format, ...);
-void halt();
+void kernel_panic(const char* format, ...);
+void kernel_halt();

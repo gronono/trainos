@@ -92,12 +92,12 @@ IDTEntry idt_entries[IDT_ENTRIES_SIZE];
  */
 void isr_handler(InterruptFrame* frame){
     if (frame->idt_index < 32){
-        panic("!! Exception: %u (%s) - error: %#X !!\n",
+        kernel_panic("!! Exception: %u (%s) - error: %#X !!\n",
               frame->idt_index,
               exception_messages[frame->idt_index],
               frame->error_code);
     } else {
-        panic("!! Unknown interrupt: %d !!\n", frame->idt_index);
+        kernel_panic("!! Unknown interrupt: %d !!\n", frame->idt_index);
     }
 }
 

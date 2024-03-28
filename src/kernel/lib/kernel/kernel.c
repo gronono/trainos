@@ -15,13 +15,13 @@ void kernel_init() {
     kprintf("sizeof(uintptr_t): %u\n", sizeof(uintptr_t));
 }
 
-void halt() {
+void kernel_halt() {
     kprintf("!! System Halt !!\n");
     clear_interrupt_flag();
     for (;;) {}
 }
 
-void panic(const char* format, ...) {
+void kernel_panic(const char* format, ...) {
     kprintf("!! Kernel Panic !!\n");
 
     va_list vargs;
@@ -29,7 +29,7 @@ void panic(const char* format, ...) {
     kprintf_vargs(format, vargs);
     va_end(vargs);
 
-    halt();
+    kernel_halt();
 }
 
 
