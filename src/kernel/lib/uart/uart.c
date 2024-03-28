@@ -1,5 +1,5 @@
 #include "uart.h"
-#include "../cpu//bios.h"
+#include "../cpu/port.h"
 
 bool is_transmit_empty(const uint16_t port) {
     return port_read(port + 5) & 0x20;

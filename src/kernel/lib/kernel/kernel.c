@@ -17,7 +17,7 @@ void kernel_init() {
 
 void kernel_halt() {
     kprintf("!! System Halt !!\n");
-    clear_interrupt_flag();
+    interrupt_clear_flag();
     for (;;) {}
 }
 

@@ -8,7 +8,7 @@
  * Set Interrupt Flag
  * https://www.felixcloutier.com/x86/sti
  */
-static inline void set_interrupt_flag() {
+static inline void interrupt_set_flag() {
     kprintf("Set Interrupt Flag\n");
     __asm__ volatile("sti");
 }
@@ -17,7 +17,7 @@ static inline void set_interrupt_flag() {
  * Clear Interrupt Flag
  * https://www.felixcloutier.com/x86/cli
  */
-static inline void clear_interrupt_flag() {
+static inline void interrupt_clear_flag() {
     kprintf("CLear Interrupt Flag\n");
     __asm__ volatile("cli");
 }

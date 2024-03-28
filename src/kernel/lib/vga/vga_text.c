@@ -1,5 +1,5 @@
 #include "vga_text.h"
-#include "../cpu/bios.h"
+#include "../cpu/port.h"
 #include "../kernel/kernel.h"
 
 #define VGA_CTRL_PORT   0x3D4

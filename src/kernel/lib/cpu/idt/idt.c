@@ -1,6 +1,6 @@
 #include "idt.h"
 #include "_isr.h"
-#include "../bios.h"
+#include "../port.h"
 #include "../interrupt.h"
 
 #ifdef __x86_64__
@@ -127,7 +127,7 @@ void irq_handler(InterruptFrame* frame){
 
 void init_idt() {
     kprintf("Init IDT - addr: %p\n", idt_entries);
-    clear_interrupt_flag();
+    interrupt_clear_flag();
 
     // TODO understand !!
     //0x20 commands and 0x21 data
@@ -168,5 +168,5 @@ void init_idt() {
     kprintf("Set IDT Description. Size=%d. Table=%p\n", descriptor.size, descriptor.ptr_table);
     __asm__ volatile("lidt %0" : : "m" (descriptor));
 
-    set_interrupt_flag();
+    interrupt_set_flag();
 }
