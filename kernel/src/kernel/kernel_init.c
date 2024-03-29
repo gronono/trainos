@@ -1,7 +1,7 @@
 #include <kernel/kernel.h>
-#include <hardware/interrupt.h>
 #include <hardware/uart.h>
 #include <hardware/vga_text.h>
+#include <stdio.h>
 
 int kernel_putc(int ch) {
     uart_write(COM1, ch);
@@ -39,21 +39,4 @@ void kernel_init() {
            (void*) kernel_end_addr,
            kernel_size);
 
-}
-
-void kernel_halt() {
-    printf("!! System Halt !!\n");
-    interrupt_clear_flag();
-    for (;;) {}
-}
-
-void kernel_panic(const char* format, ...) {
-    fprintf(stderr, "!! Kernel Panic !!\n");
-
-    va_list vargs;
-    va_start(vargs, format);
-    vfprintf(stderr, format, vargs);
-    va_end(vargs);
-
-    kernel_halt();
 }
