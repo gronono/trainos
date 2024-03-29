@@ -20,7 +20,7 @@ typedef struct {
 void print_memory_map() {
     MemoryMap* map = (MemoryMap*) MEMORY_MAP_ADDR;
     printf("Memory Map from %p : %u entries\n", MEMORY_MAP_ADDR, map->size);
-    printf("#   Start Address       Length              Type\n");
+    printf("#  Start Address       Length              Type\n");
     uint64_t total_size = 0;
     for (uint32_t i = 0; i < map->size; i++) {
         MemoryMapEntry* entry = &(map->entries[i]);

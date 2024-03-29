@@ -8,7 +8,9 @@ SECTIONS
      */
     . = 0x700;
 
-    /* The kmain function must be the first thing as required by VBR  */
+    PROVIDE(kernel_start = .);
+
+    /* The kmain function must be the first thing as required by the VBR  */
     .kmain : {
         *(.kmain)
     }
@@ -23,8 +25,10 @@ SECTIONS
         *(.data)
     }
 
-    /** bss = initialized data */
+    /** bss = uninitialized data */
     .bss : {
         *(.bss)
     }
+
+    PROVIDE(kernel_end = .);
 }
