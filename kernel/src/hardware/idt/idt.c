@@ -126,7 +126,7 @@ void irq_handler(InterruptFrame* frame){
     port_write(0x20,0x20);
 }
 
-void init_idt() {
+void idt_init() {
     printf("Init IDT - addr: %p\n", idt_entries);
     interrupt_clear_flag();
 

@@ -1,3 +1,3 @@
 #pragma once
 
-void init_memory();
+void memory_init();

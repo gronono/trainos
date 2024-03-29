@@ -55,7 +55,3 @@ void print_memory_map() {
 //Total size: 134184960 Bytes
 //        Total size: 131040 kB
 //        Total size: 127 MB
-
-void init_memory() {
-    print_memory_map();
-}

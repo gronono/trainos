@@ -3,4 +3,4 @@
 /**
  * Initialize the Interrupt Description Table (IDT)
  */
-void init_idt();
+void idt_init();

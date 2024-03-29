@@ -7,8 +7,8 @@
 __attribute__((section(".kmain"))) void kmain() {
     kernel_init();
     vga_text_reset();
-    init_idt();
-    init_memory();
+    idt_init();
+    memory_init();
 
 //    int a = 0;
 //    printf("%u", 5 / a);
