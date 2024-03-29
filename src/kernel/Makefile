@@ -1,6 +1,6 @@
 include ../../Makefile.inc
 
-# -std=c17 use C version defined in ISO/IEC 9899:2018
+# -std=c18 use C version defined in ISO/IEC 9899:2018
 # -nostdinc do not seach for std directories for headers files
 # -ffreestanding freestanding environnement
 # -c do not link

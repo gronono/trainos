@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../typedefs.h"
+#include "../libc/stdint.h"
 
 static inline uint8_t port_read(const uint16_t port) {
     uint8_t value;

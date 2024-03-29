@@ -1,6 +1,6 @@
-#include "string.h"
+#include "../string.h"
 
-size_t string_length(const char* str) {
+size_t strlen(const char *str) {
     size_t len = 0;
     while (*str != '\0') {
         len++;
@@ -9,9 +9,9 @@ size_t string_length(const char* str) {
     return len;
 }
 
-void string_reverse(char* str) {
+void strrev(char* str) {
     size_t start = 0;
-    size_t end = string_length(str) - 1;
+    size_t end = strlen(str) - 1;
 
     while (start < end) {
         char temp = str[start];
@@ -21,3 +21,4 @@ void string_reverse(char* str) {
         end--;
     }
 }
+

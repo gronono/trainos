@@ -1,7 +1,8 @@
 #include "memory.h"
 
-#include "../kernel/kernel.h"
-#include "../typedefs.h"
+#include "../libc/stdint.h"
+#include "../libc/stdio.h"
+
 
 #define MEMORY_MAP_ADDR 0x8000
 
@@ -18,11 +19,11 @@ typedef struct {
 
 void print_memory_map() {
     MemoryMap* map = (MemoryMap*) MEMORY_MAP_ADDR;
-    kprintf("Memory Map from %p : %u entries\n", MEMORY_MAP_ADDR, map->size);
-    kprintf("#   Start Address       Length              Type\n");
+    printf("Memory Map from %#llx : %u entries\n", MEMORY_MAP_ADDR, map->size);
+    printf("#   Start Address       Length              Type\n");
     for (uint32_t i = 0; i < map->size; i++) {
         MemoryMapEntry* entry = &(map->entries[i]);
-        kprintf("#%u %p 0x%016llx  0x%016llx  %u\n", i,
+        printf("#%u %p 0x%016llx  0x%016llx  %u\n", i,
                 entry,
                 entry->start_address,
                 entry->length,

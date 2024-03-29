@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../typedefs.h"
+#include "../../libc/stdint.h"
 
 /**
  * The base I/O port address for UART communication on COM1.
@@ -17,7 +17,7 @@
  * @param port The I/O port address of the UART.
  * @return     STATUS_SUCCESS if initialization was successful, STATUS_FAILURE otherwise.
  */
-Status uart_init(const uint16_t port);
+int uart_init(const uint16_t port);
 
 /**
  * Writes a single byte to the UART.

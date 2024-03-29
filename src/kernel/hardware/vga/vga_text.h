@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../typedefs.h"
+#include "../../libc/stdint.h"
 
 /**
  * Enumeration of standard VGA colors.

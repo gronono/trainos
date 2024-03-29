@@ -1,22 +1,19 @@
-#include "kernel.h"
+#include "../stdbool.h"
+#include "../stddef.h"
+#include "../stdio.h"
+#include "../string.h"
 
-#include "../typedefs.h"
-#include "../hardware/uart/uart.h"
-#include "../hardware/vga/vga_text.h"
-#include "../string/string.h"
-
-/**
- * A basic implementation of the standard printf.
- *
- * Format: %[flags][width][.precision][length]type
- *
- * Unsupported flags fields: -, '
- * Unsupported width feature: padding right
- * Unsupported precision field: with float / double (only string)
- * Unsupported length field: L
- * Unsupported type: f, F, e, E, g, G, a, A
- */
-void kprintf(const char* format, ...);
+typedef struct {
+    uint8_t state;
+    uint8_t flags;
+    int width;
+    int precision;
+    uint8_t length;
+    uint8_t type;
+    uint8_t extra;
+    int written;
+    FILE* stream;
+} Params;
 
 // Using a state machine
 #define STATE_START          0
@@ -64,18 +61,7 @@ void kprintf(const char* format, ...);
 #define EXTRA_WIDTH_STAR     0b010
 #define EXTRA_PRECISION_STAR 0b100
 
-typedef struct {
-    uint8_t state;
-    uint8_t flags;
-    int width;
-    int precision;
-    uint8_t length;
-    uint8_t type;
-    uint8_t extra;
-    int written;
-} Params;
-
-void reset(Params * params) {
+void reset(Params* params) {
     params->flags = 0;
     params->width = 0;
     params->precision = 0;
@@ -84,11 +70,6 @@ void reset(Params * params) {
     params->extra = 0;
 }
 
-void writec(Params* params, char c) {
-    uart_write(COM1, c);
-    vga_text_put_char(c);
-    params->written++;
-}
 
 void pre_append(Params* params, char* str, va_list* vargs) {
     if (params->flags & FLAG_MINUS) {
@@ -104,9 +85,9 @@ void pre_append(Params* params, char* str, va_list* vargs) {
         c = '0';
     }
 
-    size_t size = string_length(str);
+    size_t size = strlen(str);
     while (width > size) {
-        writec(params, c);
+        fputc(c, params->stream);
         width--;
     }
 }
@@ -116,22 +97,22 @@ void writes(Params* params, char* str, va_list* vargs) {
 
     for (size_t i = 0; *str != '\0'; i++, str++) {
         if (params->precision == 0 || i < params->precision) {
-            writec(params, *str);
+            fputc(*str, params->stream);
         }
     }
 }
 
-void handle_start(Params* params, char** ptr) {
+void parse_start(Params* params, char** ptr) {
     reset(params);
     if (**ptr == '%') {
         params->state = STATE_FLAGS;
     } else {
-        writec(params, **ptr);
+        fputc(**ptr, params->stream);
     }
     (*ptr)++;
 }
 
-void handle_flags(Params* params, char** ptr) {
+void parse_flags(Params* params, char** ptr) {
     switch (**ptr) {
         case '-':
             params->flags |= FLAG_MINUS;
@@ -162,7 +143,7 @@ void handle_flags(Params* params, char** ptr) {
     }
 }
 
-void handle_width(Params* params, char** ptr) {
+void parse_width(Params* params, char** ptr) {
     if (**ptr >= '0' && **ptr <= '9') {
         params->width = params->width * 10 + (**ptr - '0');
         (*ptr)++;
@@ -170,7 +151,7 @@ void handle_width(Params* params, char** ptr) {
         if (params->width == 0) {
             params->extra |= EXTRA_WIDTH_STAR;
         } else {
-            kprintf("<invalid width '%u*'>", params->width);
+            fprintf(stderr, "<invalid width '%u*'>", params->width);
         }
         (*ptr)++;
     } else if (**ptr == '.') {
@@ -181,7 +162,7 @@ void handle_width(Params* params, char** ptr) {
     }
 }
 
-void handle_precision(Params* params, char** ptr) {
+void parse_precision(Params* params, char** ptr) {
     if (**ptr >= '0' && **ptr <= '9') {
         params->precision = params->precision * 10 + (**ptr - '0');
         (*ptr)++;
@@ -189,7 +170,7 @@ void handle_precision(Params* params, char** ptr) {
         if (params->precision == 0) {
             params->extra |= EXTRA_PRECISION_STAR;
         } else {
-            kprintf("<invalid precision '%u*'>", params->precision);
+            fprintf(stderr,  "<invalid precision '%u*'>", params->precision);
         }
         (*ptr)++;
     } else {
@@ -197,7 +178,7 @@ void handle_precision(Params* params, char** ptr) {
     }
 }
 
-void handle_length(Params* params, char** ptr) {
+void parse_length(Params* params, char** ptr) {
     switch (**ptr) {
         case 'h':
             if (params->length == LENGTH_INT_SHORT) {
@@ -236,7 +217,7 @@ void handle_length(Params* params, char** ptr) {
     }
 }
 
-void handle_type(Params* params, char** ptr) {
+void parse_type(Params* params, char** ptr) {
     switch (**ptr) {
         case '%':
             params->type = TYPE_PERCENT;
@@ -276,7 +257,7 @@ void handle_type(Params* params, char** ptr) {
         case 'g':
         case 'G':
         default:
-            kprintf("<unsupported type '%c'>", **ptr);
+            fprintf(stderr, "<unsupported type '%c'>", **ptr);
             break;
     }
     params->state = STATE_PRINT;
@@ -323,7 +304,7 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
             is_signed = true;
             break;
         case LENGTH_LONG_DOUBLE:
-            kprintf("<unsupported length '%u'>", params->length);
+            fprintf(stderr, "<unsupported length '%u'>", params->length);
             return;
         default:
             value = is_signed ? (long long) va_arg(*vargs, int) : (long long) va_arg(*vargs, unsigned int);
@@ -369,7 +350,7 @@ void print_integer(Params* params, va_list* vargs, uint8_t base, bool is_signed)
             }
         }
     }
-    string_reverse(buffer);
+    strrev(buffer);
     writes(params, buffer, vargs);
 }
 
@@ -385,7 +366,7 @@ void print_pointer(Params* params, va_list* vargs) {
 
 void print_char(Params* params, va_list* vargs) {
     char c = va_arg(*vargs, int);
-    writec(params, c);
+    fputc(c, params->stream);
 }
 
 void print_nothing(Params* params, va_list* vargs) {
@@ -393,10 +374,10 @@ void print_nothing(Params* params, va_list* vargs) {
     *n_ptr = params->written;
 }
 
-void handle_print(Params* params, va_list* vargs) {
+void print(Params* params, va_list* vargs) {
     switch (params->type) {
         case TYPE_PERCENT:
-            writec(params, '%');
+            fputc('%', params->stream);
             break;
         case TYPE_CHAR:
             print_char(params, vargs);
@@ -426,43 +407,37 @@ void handle_print(Params* params, va_list* vargs) {
         case TYPE_DOUBLE_STD:
         case TYPE_DOUBLE_EXP:
         case TYPE_DOUBLE_HEX:
-            kprintf("<unimplemented type '%u'>", params->type);
+            fprintf(stderr,  "<unimplemented type '%u'>", params->type);
     }
     params->state = STATE_START;
 }
 
-typedef void (*StateHandler_t)(Params*, char**);
-const StateHandler_t state_handlers[] = {
-    handle_start,
-    handle_flags,
-    handle_width,
-    handle_precision,
-    handle_length,
-    handle_type,
+typedef void (*state_parser)(Params*, char**);
+const state_parser state_parsers[] = {
+        parse_start,
+        parse_flags,
+        parse_width,
+        parse_precision,
+        parse_length,
+        parse_type,
 };
 
-void kprintf_vargs(const char* format, va_list vargs) {
+int vfprintf(FILE* stream, const char* format, va_list vargs) {
     if (format == NULL) {
-        return;
+        return EOF;
     }
 
     Params params = {0};
+    params.stream = stream;
     params.state = STATE_START;
 
     char* ptr = (char*) format;
     while (*ptr != '\0') {
         if (params.state != STATE_PRINT) {
-            StateHandler_t state_handler = state_handlers[params.state];
-            state_handler(&params, &ptr);
+            state_parser parser = state_parsers[params.state];
+            parser(&params, &ptr);
         } else {
-            handle_print(&params, &vargs);
+            print(&params, &vargs);
         }
     }
-}
-
-void kprintf(const char* format, ...) {
-    va_list vargs;
-    va_start(vargs, format);
-    kprintf_vargs(format, vargs);
-    va_end(vargs);
 }

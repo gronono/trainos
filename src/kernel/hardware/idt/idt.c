@@ -2,6 +2,7 @@
 #include "_isr.h"
 #include "../port.h"
 #include "../interrupt.h"
+#include "../../kernel/kernel.h"
 
 #ifdef __x86_64__
 #include "_idt64.h"
@@ -113,7 +114,7 @@ void irq_handler(InterruptFrame* frame){
     handler = irq_routines[idt_index];
 
     if (handler) {
-        kprintf("IRQ %d: %p\n", idt_index, handler);
+        printf("IRQ %d: %p\n", idt_index, handler);
         handler(frame);
     }
 
@@ -126,7 +127,7 @@ void irq_handler(InterruptFrame* frame){
 }
 
 void init_idt() {
-    kprintf("Init IDT - addr: %p\n", idt_entries);
+    printf("Init IDT - addr: %p\n", idt_entries);
     interrupt_clear_flag();
 
     // TODO understand !!
@@ -165,7 +166,7 @@ void init_idt() {
     IDTDescriptor descriptor;
     descriptor.size = sizeof(idt_entries);
     descriptor.ptr_table = idt_entries;
-    kprintf("Set IDT Description. Size=%d. Table=%p\n", descriptor.size, descriptor.ptr_table);
+    printf("Set IDT Description. Size=%d. Table=%p\n", descriptor.size, descriptor.ptr_table);
     __asm__ volatile("lidt %0" : : "m" (descriptor));
 
     interrupt_set_flag();

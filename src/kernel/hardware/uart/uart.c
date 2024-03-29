@@ -1,5 +1,7 @@
 #include "uart.h"
 #include "../port.h"
+#include "../../libc/stdio.h"
+#include "../../libc/stdbool.h"
 
 bool is_transmit_empty(const uint16_t port) {
     return port_read(port + 5) & 0x20;
@@ -9,7 +11,7 @@ uint8_t received(const uint16_t port) {
     return port_read(port + 5) & 1;
 }
 
-Status uart_init(const uint16_t port) {
+int uart_init(const uint16_t port) {
     port_write(port + 1, 0x00);    // Disable all interrupts
     port_write(port + 3, 0x80);    // Enable DLAB (set baud rate divisor)
     port_write(port + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
@@ -22,13 +24,13 @@ Status uart_init(const uint16_t port) {
 
     // Check if serial is faulty (i.e: not same byte as sent)
     if (port_read(port + 0) != 0xAE) {
-        return STATUS_FAILURE;
+        return EOF;
     }
 
     // If serial is not faulty set it in normal operation mode
     // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
     port_write(port + 4, 0x0F);
-    return STATUS_SUCCESS;
+    return 0;
 }
 
 void uart_write(const uint16_t port, uint8_t c) {

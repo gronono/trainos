@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../typedefs.h"
+#include "../libc/stdint.h"
 
 /**
  * Typedef representing an offset value for an entry in the Global Descriptor Table (GDT).
