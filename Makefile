@@ -13,7 +13,7 @@ build: clean
 
 .PHONY: run
 run: build
-	docker run --rm -v ${ROOT_DIR}:/trainos ${DOCKER_GUI_ARGS} ${BUILD_IMAGE_NAME} ${QEMU_EXE} -m 1G -drive format=raw,if=ide,index=0,media=disk,file=/trainos/build/${OS_NAME}.bin -serial stdio
+	docker run --rm -v ${ROOT_DIR}:/trainos ${DOCKER_GUI_ARGS} ${BUILD_IMAGE_NAME} ${QEMU_EXE} -m 128M -drive format=raw,if=ide,index=0,media=disk,file=/trainos/build/${OS_NAME}.bin -serial stdio
 
 .PHONY: bochs
 bochs: build

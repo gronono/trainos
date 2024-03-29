@@ -25,7 +25,7 @@ info "Create msdos table"
 try parted -s "${DISK}" mktable msdos
 
 info "Copy MBR"
-# try dd if=/trainos/build/boot/legacy/mbr.bin of="${DISK}" bs=1 seek=0 conv=notrunc
+try dd if=/trainos/build/boot/legacy/mbr.bin of="${DISK}" bs=1 seek=0 conv=notrunc
 
 DISK_SECTORS=$(( DISK_SIZE * 1024 * 1024 / SECTOR_SIZE ))
 PARTITION_START=2048  # Start of partition (in sectors)
