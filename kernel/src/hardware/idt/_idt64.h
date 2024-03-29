@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "../gdt.h"
+#include <hardware/gdt.h>
 
 /**
  * Represents an entry in the Interrupt Descriptor Table (IDT) in 64-bit mode.

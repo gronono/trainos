@@ -1,7 +1,8 @@
-#include "kernel/kernel.h"
-#include "memory/memory.h"
-#include "hardware/vga/vga_text.h"
-#include "hardware/idt/idt.h"
+#include <kernel/kernel.h>
+#include <memory/memory.h>
+#include <hardware/vga_text.h>
+#include <hardware/idt.h>
+#include <stdio.h>
 
 __attribute__((section(".kmain"))) void kmain() {
     kernel_init();

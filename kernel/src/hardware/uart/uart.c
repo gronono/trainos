@@ -1,5 +1,5 @@
-#include "uart.h"
-#include "../port.h"
+#include <hardware/uart.h>
+#include <hardware/port.h>
 #include <stdio.h>
 #include <stdbool.h>
 

@@ -1,7 +1,7 @@
-#include "kernel.h"
-#include "../hardware/interrupt.h"
-#include "../hardware/uart/uart.h"
-#include "../hardware/vga/vga_text.h"
+#include <kernel/kernel.h>
+#include <hardware/interrupt.h>
+#include <hardware/uart.h>
+#include <hardware/vga_text.h>
 
 int kernel_putc(int ch) {
     uart_write(COM1, ch);

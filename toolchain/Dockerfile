@@ -28,6 +28,7 @@ RUN apt-get update &&   \
 RUN apt-get install -y  \
         bison           \
         build-essential \
+        cmake           \
         curl            \
         flex            \
         libgmp3-dev     \

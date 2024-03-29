@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "trainos",
+            "includePath": [
+                "${workspaceFolder}/libc/include",
+                "${workspaceFolder}/kernel/include"
+            ]
+        }
+    ]
+}

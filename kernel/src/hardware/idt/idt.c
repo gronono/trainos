@@ -1,9 +1,9 @@
-#include "idt.h"
-#include "_isr.h"
-#include "../port.h"
-#include "../interrupt.h"
-#include "../../kernel/kernel.h"
+#include <hardware/idt.h>
+#include <hardware/port.h>
+#include <hardware/interrupt.h>
+#include <kernel/kernel.h>
 
+#include "_isr.h"
 #ifdef __x86_64__
 #include "_idt64.h"
 #else
