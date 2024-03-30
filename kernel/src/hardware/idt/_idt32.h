@@ -10,7 +10,7 @@ typedef struct {
     /** Lower 16 bits of the Interrupt Service Routine (ISR) address in gdt_segment. */
     uint16_t isr_low;
     /** GDT segment selector for the ISR. */
-    GDTOffset gdt_segment;
+    GDTOffset_t gdt_segment;
     /** Reserved field, should be set to zero. */
     uint8_t  reserved;
     /** Flags specifying the type and attributes of the interrupt gate. */

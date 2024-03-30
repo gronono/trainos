@@ -1,3 +1,6 @@
+/**
+ * Definitions for Universal Asynchronous Receiver Transmitter (UART).
+ */
 #pragma once
 
 #include <stdint.h>
