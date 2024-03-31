@@ -440,4 +440,5 @@ int vfprintf(FILE* stream, const char* format, va_list vargs) {
             print(&params, &vargs);
         }
     }
+    return params.written;
 }
