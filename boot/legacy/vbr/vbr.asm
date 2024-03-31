@@ -10,10 +10,11 @@ org 0x053E   ; Will moved to 0x500 so set origin to that + offset by FAT16 heade
 %include "../lib/symbols.asm"
 ; Our location after moving
 %define ORIGIN_ADDR         0x06E2
+%define DISK_NUM_ADDR       0x0500
 %define MEMORY_MAP_ADDR     0x0501
 
 begin:
-    BREAKPOINT
+    mov [DISK_NUM_ADDR], dl
     %include "../lib/init.asm"
 
     mov si, msg_welcome

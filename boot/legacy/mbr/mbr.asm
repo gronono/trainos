@@ -28,7 +28,6 @@ select:
 
     mov si, msg_boot_next
     call print_string
-    BREAKPOINT
     jmp 0x0000:0x7C00   ; jump to the VBR
 
     .disk_error:
