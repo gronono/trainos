@@ -3,22 +3,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define MEMORY_MAP_ADDR 0x0501
-
-typedef struct {
-    uint64_t start_address;
-    uint64_t length;
-    uint32_t type;
-} __attribute__ ((packed)) MemoryMapEntry;
-
-typedef struct {
-    uint32_t size;
-    MemoryMapEntry entries[];
-} __attribute__ ((packed)) MemoryMap;
-
-void print_memory_map() {
-    MemoryMap* map = (MemoryMap*) MEMORY_MAP_ADDR;
-    printf("Memory Map from %p : %u entries\n", MEMORY_MAP_ADDR, map->size);
+void print_memory_map(MemoryMap* map) {
+    printf("Memory Map from %p : %u entries\n", map, map->size);
     printf("#  Start Address       Length              Type\n");
     uint64_t total_size = 0;
     for (uint32_t i = 0; i < map->size; i++) {

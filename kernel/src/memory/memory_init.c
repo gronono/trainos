@@ -1,5 +1,6 @@
+#include <memory/memory.h>
 
-extern print_memory_map();
-void memory_init() {
-    print_memory_map();
+extern print_memory_map(MemoryMap* map);
+void memory_init(MemoryMap* map) {
+    print_memory_map(map);
 }

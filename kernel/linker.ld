@@ -6,7 +6,7 @@ SECTIONS
     /*
      * Just after the VBR located at 0x500 + 1 sector (=512=0x200) = 0x700
      */
-    . = 0x700;
+    . = 0x08E2;
 
     PROVIDE(kernel_start = .);
 

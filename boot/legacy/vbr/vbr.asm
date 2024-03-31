@@ -9,9 +9,10 @@ org 0x053E   ; Will moved to 0x500 so set origin to that + offset by FAT16 heade
 
 %include "../lib/symbols.asm"
 ; Our location after moving
-%define ORIGIN_ADDR         0x06E2
 %define DISK_NUM_ADDR       0x0500
 %define MEMORY_MAP_ADDR     0x0501
+%define ORIGIN_ADDR         0x06E2
+%define KERNEL_ADDR         0x08E2
 
 begin:
     mov [DISK_NUM_ADDR], dl
@@ -41,7 +42,12 @@ after_read:
     %include "./switch_protected_mode.asm"
 
     ; Jump to kmain.c
-    jmp GDT_CODE:0x700
+    mov eax, [DISK_NUM_ADDR]
+    push eax
+    mov eax, MEMORY_MAP_ADDR
+    push eax
+    call GDT_CODE:KERNEL_ADDR
+    jmp $
 
 %include "../lib/print_string.asm"
 msg_welcome     db 'TrainOS VBR', EOL, EOL, 0
@@ -82,7 +88,7 @@ kernel_dap:
     ; number of sectors to read (1 sector = 512 bytes)
     .sectors    dw  0x001B  ;   max around 3FD  FIXME Dynamic size
     ; destination = 0x0000:0x7C00
-    .offset     dw  0x0700  ; TODO ? Move just behind VBR
+    .offset     dw  KERNEL_ADDR  ; TODO ? Move just behind VBR
     .segment    dw  0x0000
     ; LBA Address = index (zero based) of the first sector to read
     .lba        dq  0x0000086C  ; value is set on compile FIXME dynamic address
