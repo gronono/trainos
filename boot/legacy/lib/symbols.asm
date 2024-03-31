@@ -1,6 +1,3 @@
-; Our location after moving
-%define ORIGIN_ADDR                  0x0500
-
 ; Magic breakpoint from Bochs
 %define BREAKPOINT                  xchg bx, bx
 
@@ -12,6 +9,7 @@
 %define EOL                         CR, LF  ; End of Line \r\n
 
 ; Partition tables
+%define PARTITION_TABLE_SIZE        16*4    ; size of partition table
 %define PARTITION_TABLE_OFFSET      0x1BE   ; Offset of the start of partition table
 %define PARTITION_ENTRY_SIZE        0x10    ; Size of a partition entry
 %define BOOT_FLAG_OFFSET            0x00    ; Boot indicator bit flag: 0 = no, 0x80 = bootable
@@ -35,6 +33,8 @@
 ;
 %define GDT_CODE                    0x08
 %define GDT_DATA                    0x10
+
+%define MBR_SIZE                    512
 
 ; Size of FAT headers
 ; FAT16 = 0x3E

@@ -10,6 +10,8 @@ bits 16      ; CPU starts in real mode
 org 0x0500   ; Will moved to 0x500 so set origin to that
 
 %include "../lib/symbols.asm"
+; Our location after moving
+%define ORIGIN_ADDR                  0x0500
 
 begin:
     %include "../lib/init.asm"
@@ -26,6 +28,7 @@ select:
 
     mov si, msg_boot_next
     call print_string
+    BREAKPOINT
     jmp 0x0000:0x7C00   ; jump to the VBR
 
     .disk_error:
@@ -57,4 +60,4 @@ selected_menu   db 0
 
 end:
 ; Fill the rest of space with zeros
-times 440 - ( end - begin ) db 0
+times MBR_SIZE - PARTITION_TABLE_SIZE - ( end - begin ) db 0

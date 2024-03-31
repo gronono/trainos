@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define MEMORY_MAP_ADDR 0x8000
+#define MEMORY_MAP_ADDR 0x0501
 
 typedef struct {
     uint64_t start_address;
