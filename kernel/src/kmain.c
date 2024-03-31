@@ -10,8 +10,8 @@ __attribute__((section(".kmain"))) void kmain() {
     idt_init();
     memory_init();
 
-//    int a = 0;
-//    printf("%u", 5 / a);
+    int a = 0;
+    printf("%u", 5 / a);
 
     // Never returns from bootloader
     kernel_halt();
